@@ -2,8 +2,8 @@
 
 <!-- تصاویر اصلی بالای صفحه (بنرها یا اسکرین‌شات‌های ابزار) -->
 <p align="center">
-  <img src="./banner_01.png" alt="OWASP WSTG Assessment Tool Banner" width="48%" style="border-radius: 8px; margin-right: 2%;">
-  <img src="./banner_02.png" alt="Checklist Studio Editor Banner" width="48%" style="border-radius: 8px;">
+  <img src="banner_001.png" alt="OWASP WSTG Assessment Tool" width="48%">
+  <img src="banner_002.png" alt="Checklist Studio Editor" width="48%">
 </p>
 
 # 🛡️ OWASP WSTG Assessment Suite & Checklist Studio
