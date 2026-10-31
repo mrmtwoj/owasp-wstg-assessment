@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWASP WSTG Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue-900:#0a2540;--blue-800:#0d2e54;--blue-700:#0f3b6e;--blue-600:#1657a3;
+  --blue-500:#1e6fd9;--blue-400:#3b8ee8;--blue-100:#e8f1fc;--blue-50:#f4f8fe;
+  --orange-600:#e85d04;--orange-500:#f97316;--orange-400:#fb923c;--orange-100:#ffedd5;
+  --white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;
+  --green-500:#10b981;--red-500:#ef4444;--yellow-500:#eab308;
+  --sh-md:0 4px 12px rgba(10,37,64,.08);--sh-lg:0 12px 32px rgba(10,37,64,.12);
+  --sh-xl:0 24px 64px rgba(10,37,64,.18);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:24px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh Arabic',Tahoma,sans-serif;background:linear-gradient(135deg,#f4f8fe,#e8f1fc);color:var(--gray-800);line-height:1.6;overflow:hidden}
+[dir="rtl"] .flip{transform:scaleX(-1)}
+
+/* Layout */
+.app{display:grid;grid-template-columns:340px 1fr;height:100vh}
+.app.hidden{display:none}
+
+/* ═══ Setup overlay ═══ */
+.setup-overlay{position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#0a2540,#0f3b6e 50%,#1657a3);display:grid;place-items:center;padding:20px;overflow-y:auto}
+.setup-overlay.hidden{display:none}
+.setup-overlay::before,.setup-overlay::after{content:'';position:absolute;border-radius:50%;pointer-events:none}
+.setup-overlay::before{top:-200px;right:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(249,115,22,.25),transparent 60%)}
+.setup-overlay::after{bottom:-200px;left:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(30,111,217,.3),transparent 60%)}
+.setup-card{background:rgba(255,255,255,.98);border-radius:var(--r-xl);padding:44px 44px 36px;max-width:480px;width:100%;box-shadow:var(--sh-xl);position:relative;z-index:1;animation:slideIn .5s cubic-bezier(.4,0,.2,1)}
+@keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.setup-logo{width:64px;height:64px;background:linear-gradient(135deg,var(--orange-500),var(--orange-600));border-radius:var(--r-lg);display:grid;place-items:center;font-weight:800;font-size:28px;color:white;box-shadow:0 12px 32px rgba(249,115,22,.4);margin:0 auto 20px}
+.setup-title{text-align:center;font-size:1.4rem;font-weight:800;color:var(--blue-900);margin-bottom:8px}
+.setup-subtitle{text-align:center;color:var(--gray-600);font-size:.9rem;margin-bottom:28px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.85rem;font-weight:600;color:var(--gray-800);margin-bottom:6px}
+.form-group label .req{color:var(--red-500);margin:0 2px}
+.form-input{width:100%;padding:13px 16px;border:2px solid var(--gray-200);border-radius:var(--r-md);font-family:inherit;font-size:.95rem;transition:all .2s;background:var(--gray-50);color:var(--gray-800)}
+.form-input:focus{outline:none;border-color:var(--blue-500);background:white;box-shadow:0 0 0 4px rgba(30,111,217,.1)}
+.btn-block{width:100%;justify-content:center;padding:15px;font-size:1rem}
+.setup-load{margin-top:20px;text-align:center;padding-top:20px;border-top:1px solid var(--gray-200)}
+.setup-load>span{color:var(--gray-400);font-size:.85rem;display:block;margin-bottom:8px}
+.link-btn{background:none;border:none;color:var(--blue-600);font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.link-btn:hover{color:var(--orange-600)}
+
+/* Lang selector */
+.lang-switcher{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 10px;z-index:2}
+.lang-switcher select{background:transparent;border:none;color:white;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;outline:none;padding:0}
+.lang-switcher select option{color:var(--gray-800);background:white}
+.lang-switcher::before{content:'🌐';font-size:.9rem}
+.about-btn-start{background:none;border:none;color:rgba(255,255,255,.7);font-family:inherit;font-size:.8rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:14px;display:inline-block}
+.about-btn-start:hover{color:var(--orange-400)}
+
+/* ═══ Sidebar ═══ */
+.sidebar{background:linear-gradient(180deg,var(--blue-900),var(--blue-800));color:var(--white);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.sidebar::before{content:'';position:absolute;top:-120px;right:-120px;width:300px;height:300px;background:radial-gradient(circle,rgba(249,115,22,.15),transparent 70%);border-radius:50%;pointer-events:none}
+.sidebar-header{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);position:relative}
+.top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.logo{display:flex;align-items:center;gap:10px;min-width:0}
+.logo-mark{width:36px;height:36px;background:linear-gradient(135deg,var(--orange-500),var(--orange-600));border-radius:var(--r-md);display:grid;place-items:center;font-weight:800;font-size:16px;color:white;box-shadow:0 6px 16px rgba(249,115,22,.4);flex-shrink:0}
+.logo-text{font-size:.95rem;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo-subtitle{font-size:.68rem;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lang-pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-sm);padding:4px 8px;cursor:pointer;color:white;font-family:inherit;font-size:.75rem;font-weight:600;flex-shrink:0}
+.lang-pill:hover{background:rgba(255,255,255,.15)}
+.lang-pill option{background:white;color:var(--gray-800)}
+
+.system-info{background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.25);border-radius:var(--r-md);padding:10px 12px}
+.system-info-name{font-size:.85rem;font-weight:700;color:var(--white);margin-bottom:4px;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.system-info-name::before{content:'🏢';flex-shrink:0;font-size:.9rem}
+.system-info-row{font-size:.7rem;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.system-info-url::before{content:'🔗';flex-shrink:0}
+.system-info-version::before{content:'📌';flex-shrink:0}
+.system-info-version span{color:var(--orange-400);font-weight:700}
+
+.overall-progress{padding:14px 20px;background:rgba(0,0,0,.15);border-bottom:1px solid rgba(255,255,255,.08)}
+.overall-progress-label{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:8px;color:rgba(255,255,255,.7)}
+.overall-progress-label strong{color:var(--orange-400);font-weight:700}
+.progress-track{height:8px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--orange-500),var(--orange-400));border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(249,115,22,.6)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 20px}
+.stat{text-align:center;padding:8px 4px;border-radius:var(--r-sm);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.stat-value{font-size:1.2rem;font-weight:800;line-height:1}
+.stat-label{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px}
+.stat.pass .stat-value{color:var(--green-500)}
+.stat.fail .stat-value{color:var(--red-500)}
+.stat.pending .stat-value{color:var(--orange-400)}
+
+.categories-nav{flex:1;overflow-y:auto;padding:8px 12px 16px}
+.categories-nav::-webkit-scrollbar{width:6px}
+.categories-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:99px}
+.cat-group{margin-bottom:4px}
+.cat-header{padding:9px 10px;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:space-between;letter-spacing:.02em;gap:6px}
+.cat-id{background:rgba(249,115,22,.2);color:var(--orange-400);padding:2px 8px;border-radius:99px;font-size:.68rem;font-weight:700;flex-shrink:0}
+.cat-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.72rem;color:rgba(255,255,255,.65);font-weight:500}
+.cat-count{font-size:.68rem;color:rgba(255,255,255,.4);font-weight:500;flex-shrink:0}
+.test-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:.8rem;color:rgba(255,255,255,.75);transition:all .2s;margin-bottom:2px}
+.test-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+.test-item.active{background:linear-gradient(90deg,rgba(249,115,22,.25),rgba(249,115,22,.1));color:var(--white);border-inline-end:3px solid var(--orange-500);font-weight:600}
+.test-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.2)}
+.test-item.pass .test-dot{background:var(--green-500);box-shadow:0 0 8px var(--green-500)}
+.test-item.fail .test-dot{background:var(--red-500);box-shadow:0 0 8px var(--red-500)}
+.test-item.na .test-dot{background:var(--gray-400)}
+.sidebar-footer{padding:10px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:.7rem;color:rgba(255,255,255,.4);display:flex;justify-content:space-between;align-items:center}
+.sidebar-footer a{color:var(--orange-400);text-decoration:none}
+.sidebar-footer a:hover{text-decoration:underline}
+
+/* ═══ Main ═══ */
+.main{display:flex;flex-direction:column;overflow:hidden;background:var(--white)}
+.topbar{padding:14px 32px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;background:var(--white);flex-shrink:0;gap:12px;flex-wrap:wrap}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--gray-600);flex-wrap:wrap}
+.breadcrumb-badge{background:var(--blue-100);color:var(--blue-600);padding:4px 10px;border-radius:99px;font-weight:600;font-size:.75rem}
+.breadcrumb-chevron{color:var(--gray-400)}
+.topbar-actions{display:flex;gap:6px;align-items:center}
+.btn-icon{width:40px;height:40px;border:1px solid var(--gray-200);background:var(--white);border-radius:var(--r-sm);cursor:pointer;display:grid;place-items:center;transition:all .2s;color:var(--gray-600);position:relative}
+.btn-icon:hover{background:var(--blue-50);border-color:var(--blue-400);color:var(--blue-600);transform:translateY(-1px)}
+.btn-icon.primary{background:var(--blue-500);color:white;border-color:var(--blue-500)}
+.btn-icon.primary:hover{background:var(--blue-600);color:white}
+.btn-icon.danger:hover{background:#fef2f2;border-color:var(--red-500);color:var(--red-500)}
+.btn-icon .tooltip{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--blue-900);color:white;font-size:.7rem;padding:4px 10px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;font-family:inherit;font-weight:500;z-index:10}
+.btn-icon:hover .tooltip{opacity:1}
+
+.content{flex:1;overflow-y:auto;padding:32px 40px;scroll-behavior:smooth}
+.content::-webkit-scrollbar{width:10px}
+.content::-webkit-scrollbar-track{background:var(--gray-50)}
+.content::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px;border:2px solid var(--gray-50)}
+.test-card{max-width:900px;margin:0 auto;animation:slideIn .4s cubic-bezier(.4,0,.2,1)}
+.test-header{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--gray-200)}
+.test-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.badge{padding:5px 12px;border-radius:99px;font-size:.72rem;font-weight:700;letter-spacing:.02em}
+.badge-blue{background:var(--blue-100);color:var(--blue-600)}
+.badge-orange{background:var(--orange-100);color:var(--orange-600)}
+.badge-id{background:var(--gray-100);color:var(--gray-600);font-family:'Courier New',monospace;font-weight:600}
+.badge-sev-critical{background:#7f1d1d;color:#fff}
+.badge-sev-high{background:var(--orange-100);color:var(--orange-600);border:1px solid var(--orange-400)}
+.badge-sev-medium{background:#fef9c3;color:#854d0e}
+.badge-sev-low{background:var(--blue-100);color:var(--blue-600)}
+.test-title{font-size:1.7rem;font-weight:800;color:var(--blue-900);line-height:1.3;margin-bottom:8px;letter-spacing:-.02em}
+.test-subtitle{font-size:.9rem;color:var(--gray-600);font-weight:400;direction:ltr;text-align:end}
+
+.section{margin-bottom:28px}
+.section-title{display:flex;align-items:center;gap:10px;font-size:1.02rem;font-weight:700;color:var(--blue-800);margin-bottom:14px}
+.section-title::before{content:'';width:4px;height:18px;background:linear-gradient(180deg,var(--orange-500),var(--orange-600));border-radius:99px}
+.description-box{background:var(--blue-50);border:1px solid var(--blue-100);padding:16px 20px;border-radius:var(--r-md);font-size:.9rem;color:var(--gray-800);line-height:1.8}
+.remediation-box{background:#f0fdf4;border:1px solid #bbf7d0;padding:16px 20px;border-radius:var(--r-md);font-size:.9rem;color:#14532d;line-height:1.8}
+.payload-box{background:#1e293b;color:#e2e8f0;padding:16px 20px;border-radius:var(--r-md);font-family:'Courier New',monospace;font-size:.82rem;line-height:1.7;direction:ltr;text-align:left;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.payload-box code{color:#fb923c}
+.objectives-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.objectives-list li{background:var(--blue-50);border:1px solid var(--blue-100);padding:12px 16px;border-radius:var(--r-md);font-size:.88rem;color:var(--gray-800);display:flex;gap:10px;align-items:flex-start}
+.objective-num{background:var(--blue-500);color:white;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:2px}
+
+.severity-group,.status-group{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.severity-option,.status-option{position:relative;cursor:pointer}
+.severity-option input,.status-option input{position:absolute;opacity:0;pointer-events:none}
+.severity-option-content,.status-option-content{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border-radius:var(--r-md);border:2px solid var(--gray-200);background:var(--white);transition:all .2s;text-align:center}
+.severity-option-content:hover,.status-option-content:hover{border-color:var(--blue-400);transform:translateY(-2px);box-shadow:var(--sh-md)}
+.severity-icon,.status-icon{font-size:1.3rem}
+.severity-label,.status-label{font-size:.78rem;font-weight:600;color:var(--gray-600)}
+.severity-option input[value="critical"]:checked+.severity-option-content{border-color:#7f1d1d;background:#fef2f2}
+.severity-option input[value="critical"]:checked+.severity-option-content .severity-label{color:#7f1d1d;font-weight:800}
+.severity-option input[value="high"]:checked+.severity-option-content{border-color:var(--orange-500);background:#fff7ed}
+.severity-option input[value="high"]:checked+.severity-option-content .severity-label{color:var(--orange-600);font-weight:800}
+.severity-option input[value="medium"]:checked+.severity-option-content{border-color:var(--yellow-500);background:#fefce8}
+.severity-option input[value="medium"]:checked+.severity-option-content .severity-label{color:#854d0e;font-weight:800}
+.severity-option input[value="low"]:checked+.severity-option-content{border-color:var(--blue-400);background:var(--blue-50)}
+.severity-option input[value="low"]:checked+.severity-option-content .severity-label{color:var(--blue-600);font-weight:800}
+.status-option input[value="pass"]:checked+.status-option-content{border-color:var(--green-500);background:linear-gradient(180deg,#f0fdf4,#dcfce7)}
+.status-option input[value="pass"]:checked+.status-option-content .status-icon{background:var(--green-500);color:white;border-radius:50%}
+.status-option input[value="fail"]:checked+.status-option-content{border-color:var(--red-500);background:linear-gradient(180deg,#fef2f2,#fee2e2)}
+.status-option input[value="fail"]:checked+.status-option-content .status-icon{background:var(--red-500);color:white;border-radius:50%}
+.status-option input[value="na"]:checked+.status-option-content{border-color:var(--gray-400);background:linear-gradient(180deg,var(--gray-50),var(--gray-100))}
+.status-option input[value="na"]:checked+.status-option-content .status-icon{background:var(--gray-400);color:white;border-radius:50%}
+.status-option input[value="not_started"]:checked+.status-option-content{border-color:var(--orange-500);background:linear-gradient(180deg,#fff7ed,#ffedd5)}
+.status-option input[value="not_started"]:checked+.status-option-content .status-icon{background:var(--orange-500);color:white;border-radius:50%}
+
+.poc-upload-area{border:2px dashed var(--gray-200);border-radius:var(--r-md);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--gray-50)}
+.poc-upload-area:hover{border-color:var(--blue-400);background:var(--blue-50)}
+.poc-upload-area input{display:none}
+.poc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:14px}
+.poc-item{position:relative;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--gray-200);background:var(--gray-100)}
+.poc-item img{width:100%;height:110px;object-fit:cover;display:block}
+.poc-label{position:absolute;bottom:0;left:0;right:0;background:rgba(10,37,64,.8);color:white;font-size:.68rem;padding:3px 6px;text-align:center}
+.poc-remove{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,.9);color:white;border:none;cursor:pointer;font-size:.75rem;display:grid;place-items:center}
+
+.notes-textarea{width:100%;padding:12px 16px;border:2px solid var(--gray-200);border-radius:var(--r-md);font-family:inherit;font-size:.9rem;resize:vertical;min-height:90px;transition:all .2s;background:var(--gray-50)}
+.notes-textarea:focus{outline:none;border-color:var(--blue-500);background:white;box-shadow:0 0 0 4px rgba(30,111,217,.1)}
+
+.footer{padding:16px 32px;border-top:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;background:var(--white);flex-shrink:0;gap:16px}
+.nav-buttons{display:flex;gap:10px}
+.btn{padding:11px 24px;border-radius:var(--r-md);border:none;font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-primary{background:linear-gradient(135deg,var(--orange-500),var(--orange-600));color:white;box-shadow:0 4px 12px rgba(249,115,22,.35)}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(249,115,22,.45)}
+.btn-secondary{background:var(--white);color:var(--blue-700);border:2px solid var(--blue-100)}
+.btn-secondary:hover:not(:disabled){border-color:var(--blue-400);background:var(--blue-50)}
+.counter{font-size:.82rem;color:var(--gray-600)}
+.counter strong{color:var(--blue-600);font-weight:700}
+.counter-divider{margin:0 4px;color:var(--gray-400)}
+
+/* ═══ About modal ═══ */
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(10,37,64,.6);display:none;place-items:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:grid}
+.about-modal{background:white;border-radius:var(--r-lg);padding:36px;max-width:560px;width:100%;box-shadow:var(--sh-xl);animation:slideIn .3s ease;max-height:90vh;overflow-y:auto}
+.about-modal h2{font-size:1.3rem;color:var(--blue-900);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.about-modal h2::before{content:'👤';font-size:1.4rem}
+.about-name{font-size:1.1rem;font-weight:800;color:var(--orange-600);margin-bottom:4px}
+.about-nickname{font-size:.85rem;color:var(--gray-600);margin-bottom:16px;font-family:'Courier New',monospace;background:var(--gray-100);padding:2px 8px;border-radius:4px;display:inline-block}
+.about-bio{font-size:.88rem;line-height:1.9;color:var(--gray-800);margin-bottom:16px;text-align:justify}
+.about-bio p{margin-bottom:12px}
+.about-link{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue-500),var(--blue-600));color:white;padding:10px 20px;border-radius:var(--r-sm);text-decoration:none;font-weight:600;font-size:.88rem;transition:all .2s;margin-top:8px}
+.about-link:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(30,111,217,.4)}
+.about-close{position:absolute;top:16px;left:16px;background:var(--gray-100);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:grid;place-items:center;color:var(--gray-600)}
+.about-close:hover{background:var(--gray-200)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--blue-900);color:white;padding:12px 24px;border-radius:var(--r-md);font-size:.85rem;box-shadow:var(--sh-xl);opacity:0;transition:all .3s;z-index:999;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{background:var(--green-500)}
+.toast.error{background:var(--red-500)}
+/* ═══ Sidebar search & collapsible ═══ */
+.sidebar-search{padding:10px 12px 6px}
+.search-input{width:100%;padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-sm);color:white;font-family:inherit;font-size:.78rem;outline:none;transition:all .2s}
+.search-input::placeholder{color:rgba(255,255,255,.4)}
+.search-input:focus{background:rgba(255,255,255,.14);border-color:var(--orange-500);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
+.cat-header{cursor:pointer;user-select:none;transition:background .15s;border-radius:var(--r-sm)}
+.cat-header:hover{background:rgba(255,255,255,.05)}
+.cat-toggle{flex-shrink:0;width:18px;height:18px;display:grid;place-items:center;font-size:.9rem;font-weight:700;color:rgba(255,255,255,.5);transition:all .2s}
+.cat-toggle::before{content:'+'}
+.cat-group.expanded .cat-toggle{color:var(--orange-400)}
+.cat-group.expanded .cat-toggle::before{content:'−'}
+.cat-tests{display:none}
+.cat-group.expanded .cat-tests{display:block}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .content{padding:20px}
+  .topbar,.footer{padding:12px 16px}
+  .severity-group,.status-group{grid-template-columns:repeat(2,1fr)}
+  .test-title{font-size:1.3rem}
+  .setup-card{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Setup ═══ -->
+<div class="setup-overlay" id="setupOverlay">
+    <div class="setup-card">
+        <div class="lang-switcher">
+            <select id="langSelectSetup">
+                <option value="fa">🇮🇷 فارسی</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="la">🏛️ Latina</option>
+                <option value="hi">🇮🇳 हिन्दी</option>
+                <option value="ar">🇸🇦 العربية</option>
+            </select>
+        </div>
+        <div class="setup-logo">W</div>
+        <h1 class="setup-title" data-i18n="setupTitle">شروع ارزیابی جدید</h1>
+        <p class="setup-subtitle" data-i18n="setupSubtitle">اطلاعات سامانه مورد ارزیابی را وارد کنید</p>
+        <form id="setupForm">
+            <div class="form-group">
+                <label><span data-i18n="systemName">نام سامانه</span> <span class="req">*</span></label>
+                <input type="text" id="inputSystemName" class="form-input" data-i18n-placeholder="systemNamePh" placeholder="مثلاً: پورتال مشتریان" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label><span data-i18n="url">آدرس URL</span> <span class="req">*</span></label>
+                <input type="text" id="inputUrl" class="form-input" placeholder="https://example.com" required autocomplete="off" dir="ltr">
+            </div>
+            <div class="form-group">
+                <label><span data-i18n="version">نسخه ارزیابی</span> <span class="req">*</span></label>
+                <input type="text" id="inputVersion" class="form-input" placeholder="1.0.0" required autocomplete="off" dir="ltr">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                <span data-i18n="start">شروع ارزیابی</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </form>
+        <div class="setup-load">
+            <span data-i18n="orLoadFile">یا اگر ارزیابی ذخیره‌شده‌ای دارید</span>
+            <button type="button" class="link-btn" id="setupLoadBtn" data-i18n="loadFileBtn">📂 بارگذاری فایل ارزیابی</button>
+        </div>
+        <div style="text-align:center;">
+            <button type="button" class="about-btn-start" id="aboutBtnSetup" data-i18n="aboutUs">درباره ما</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ App ═══ -->
+<div class="app hidden" id="app">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="top-row">
+                <div class="logo">
+                    <div class="logo-mark">W</div>
+                    <div>
+                        <div class="logo-text" data-i18n="appTitle">ارزیابی امنیتی OWASP</div>
+                        <div class="logo-subtitle">OWASP TOP 10 · 2025</div>
+                    </div>
+                </div>
+                <select class="lang-pill" id="langSelectSidebar">
+                    <option value="fa">FA</option>
+                    <option value="en">EN</option>
+                    <option value="zh">中文</option>
+                    <option value="ru">RU</option>
+                    <option value="la">LA</option>
+                    <option value="hi">हि</option>
+                    <option value="ar">ع</option>
+                </select>
+            </div>
+            <div class="system-info">
+                <div class="system-info-name" id="sysName">—</div>
+                <div class="system-info-row system-info-url" id="sysUrl">—</div>
+                <div class="system-info-row system-info-version"><span data-i18n="versionLabel">نسخه:</span>&nbsp;<span id="sysVersion">—</span></div>
+            </div>
+        </div>
+        <div class="overall-progress">
+            <div class="overall-progress-label">
+                <span data-i18n="overallProgress">پیشرفت کلی</span>
+                <strong id="overallPercent">0%</strong>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="overallFill" style="width:0%"></div></div>
+        </div>
+        <div class="stats">
+            <div class="stat pass"><div class="stat-value" id="statPass">0</div><div class="stat-label" data-i18n="pass">قبول</div></div>
+            <div class="stat fail"><div class="stat-value" id="statFail">0</div><div class="stat-label" data-i18n="fail">رد</div></div>
+            <div class="stat pending"><div class="stat-value" id="statPending">0</div><div class="stat-label" data-i18n="pending">در انتظار</div></div>
+        </div>
+		<div class="sidebar-search">
+			<input type="text" id="sidebarSearch" class="search-input" data-i18n-placeholder="searchPh" placeholder="🔍 جستجو در تست‌ها...">
+		</div>
+        <nav class="categories-nav" id="categoriesNav"></nav>
+        <div class="sidebar-footer">
+            <span data-i18n="madeBy">ساخته شده توسط MR.MTwoJ</span>
+            <a href="https://acyber.ir" target="_blank">acyber.ir</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div class="breadcrumb">
+                <span class="breadcrumb-badge" id="breadcrumbCatId">A00</span>
+                <span class="breadcrumb-chevron">‹</span>
+                <span id="breadcrumbCatName">—</span>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn-icon" id="aboutBtn" title="About">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <span class="tooltip" data-i18n="aboutUs">درباره ما</span>
+                </button>
+				<button class="btn-icon" id="exportWordBtn" title="Word">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+						<polyline points="14 2 14 8 20 8"/>
+						<line x1="16" y1="13" x2="8" y2="13"/>
+						<line x1="16" y1="17" x2="8" y2="17"/>
+					</svg>
+					<span class="tooltip" data-i18n="exportWord">خروجی Word</span>
+				</button>
+                <button class="btn-icon primary" id="saveBtn" title="Save">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span class="tooltip" data-i18n="save">ذخیره ارزیابی</span>
+                </button>
+                <button class="btn-icon" id="loadBtn" title="Load">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span class="tooltip" data-i18n="load">بارگذاری</span>
+                </button>
+                <button class="btn-icon" id="editMetaBtn" title="Edit">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span class="tooltip" data-i18n="editMeta">ویرایش اطلاعات</span>
+                </button>
+                <button class="btn-icon danger" id="resetBtn" title="Reset">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    <span class="tooltip" data-i18n="reset">شروع مجدد</span>
+                </button>
+            </div>
+        </div>
+        <div class="content" id="content"><div class="test-card" id="testCard"></div></div>
+        <div class="footer">
+            <div class="counter">
+                <span data-i18n="test">تست</span>
+                <strong id="counterCurrent">1</strong>
+                <span class="counter-divider" data-i18n="of">از</span>
+                <strong id="counterTotal">1</strong>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="prevBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span data-i18n="prev">قبلی</span>
+                </button>
+                <button class="btn btn-primary" id="nextBtn">
+                    <span data-i18n="next">بعدی</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<input type="file" id="fileLoader" accept=".json" style="display:none">
+
+<!-- About modal -->
+<div class="modal-overlay" id="aboutModal">
+    <div class="about-modal" style="position:relative;">
+        <button class="about-close" id="aboutClose">✕</button>
+        <h2 data-i18n="aboutTitle">درباره سازنده</h2>
+        <div class="about-name" id="aboutName">محمد جواد جوشنی</div>
+        <div class="about-nickname">MR.MTwoJ · mrmtwoj</div>
+        <div class="about-bio" id="aboutBio"></div>
+        <a href="https://acyber.ir" target="_blank" class="about-link">
+            🌐 acyber.ir
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   i18n
+   ═══════════════════════════════════════════════════════════ */
+const LANG_ORDER = ['fa','en','zh','ru','la','hi','ar'];
+const RTL_LANGS = ['fa','ar'];
+const LANG_NAMES = { fa:'فارسی', en:'English', zh:'中文', ru:'Русский', la:'Latina', hi:'हिन्दी', ar:'العربية' };
+
+const I18N = {
+  fa: {
+    setupTitle: 'شروع ارزیابی جدید', setupSubtitle: 'اطلاعات سامانه مورد ارزیابی را وارد کنید',
+    systemName: 'نام سامانه', systemNamePh: 'مثلاً: پورتال مشتریان', url: 'آدرس URL', version: 'نسخه ارزیابی',
+    start: 'شروع ارزیابی', orLoadFile: 'یا اگر ارزیابی ذخیره‌شده‌ای دارید', loadFileBtn: '📂 بارگذاری فایل ارزیابی',
+    aboutUs: 'درباره ما', appTitle: 'ارزیابی امنیتی OWASP', versionLabel: 'نسخه:',
+    overallProgress: 'پیشرفت کلی', pass: 'قبول', fail: 'رد', pending: 'در انتظار',
+    madeBy: 'ساخته شده توسط MR.MTwoJ', description: 'شرح آسیب‌پذیری', objectives: 'اهداف آزمون',
+    remediation: 'روش رفع (Remediation)', payloads: 'پیلود و روش ارزیابی', severity: 'سطح شدت',
+    status: 'وضعیت ارزیابی', poc: 'تصاویر POC (درخواست/پاسخ)', notes: 'یادداشت‌ها',
+    notStarted: 'شروع‌نشده', na: 'بی‌ربط', critical: 'بحرانی', high: 'خطرناک', medium: 'متوسط', low: 'کم',
+    prev: 'قبلی', next: 'بعدی', save: 'ذخیره ارزیابی', load: 'بارگذاری', editMeta: 'ویرایش اطلاعات',
+    reset: 'شروع مجدد', test: 'تست', of: 'از', aboutTitle: 'درباره سازنده',
+    pocUploadHint: 'برای افزودن تصویر کلیک کنید یا فایل را اینجا رها کنید',
+    pocHint: 'PNG، JPG — به‌صورت Base64 ذخیره می‌شود',
+    notesPh: 'مشاهدات، شواهد، و توضیحات خود را اینجا ثبت کنید...',
+    resetConfirm: 'آیا از شروع مجدد مطمئن هستید؟ تمام پیشرفت پاک خواهد شد.',
+    savedToast: '✓ فایل ارزیابی دانلود شد', loadedToast: '✓ ارزیابی بارگذاری شد',
+    resetToast: '✓ ارزیابی از نو شروع شد', imageAdded: '✓ تصویر اضافه شد',
+    fillAll: 'لطفاً همه فیلدها را تکمیل کنید', updated: '✓ اطلاعات به‌روزرسانی شد', started: '✓ ارزیابی آغاز شد',
+    exportWord: 'خروجی Word', searchPh: '🔍 جستجو در تست‌ها...', wordToast: '✓ فایل Word دانلود شد',
+    wordNoMeta: 'اطلاعات ارزیابی موجود نیست', noFailed: 'هیچ آسیب‌پذیری رد شده‌ای برای خروجی وجود ندارد.',
+    bio1: 'من محمد جواد جوشنی (با نام مستعار MR.MTwoJ) هستم. متولد ۱۳۷۱ در تهران، ایران. در حوزه فناوری اطلاعات فعالیت می‌کنم و بر امنیت سایبری، سیستم‌ها و توسعه نرم‌افزار تمرکز دارم.',
+    bio2: 'علاقه زیادی به امنیت سایبری و برنامه‌نویسی سطح پایین دارم. حوزه‌های اصلی تمرکز من شامل توسعه اکسپلویت، پژوهش آسیب‌پذیری و درک نحوه کار داخلی نرم‌افزارها و سیستم‌عامل‌ها است.',
+    bio3: 'در کنار پژوهش امنیتی، با فناوری‌های وب، سرورهای لینوکس و شبکه نیز کار می‌کنم. امنیت سایبری برای من نه تنها یک حرفه، بلکه یک اشتیاق بلندمدت است.',
+  },
+  en: {
+    setupTitle: 'Start New Assessment', setupSubtitle: 'Enter the target system information',
+    systemName: 'System Name', systemNamePh: 'e.g., Customer Portal', url: 'URL Address', version: 'Assessment Version',
+    start: 'Start Assessment', orLoadFile: 'Or if you have a saved assessment', loadFileBtn: '📂 Load Assessment File',
+    aboutUs: 'About Us', appTitle: 'OWASP Security Assessment', versionLabel: 'Version:',
+    overallProgress: 'Overall Progress', pass: 'Pass', fail: 'Fail', pending: 'Pending',
+    madeBy: 'Made by MR.MTwoJ', description: 'Vulnerability Description', objectives: 'Test Objectives',
+    remediation: 'Remediation', payloads: 'Payload & Test Method', severity: 'Severity Level',
+    status: 'Assessment Status', poc: 'POC Images (Request/Response)', notes: 'Notes',
+    notStarted: 'Not Started', na: 'N/A', critical: 'Critical', high: 'High', medium: 'Medium', low: 'Low',
+    prev: 'Previous', next: 'Next', save: 'Save Assessment', load: 'Load', editMeta: 'Edit Info',
+    reset: 'Reset', test: 'Test', of: 'of', aboutTitle: 'About the Author',
+    pocUploadHint: 'Click to add image or drop file here', pocHint: 'PNG, JPG — stored as Base64',
+    notesPh: 'Record your observations, evidence, and notes here...', resetConfirm: 'Are you sure? All progress will be cleared.',
+    savedToast: '✓ Assessment file downloaded', loadedToast: '✓ Assessment loaded',
+    resetToast: '✓ Assessment restarted', imageAdded: '✓ Image added',
+    fillAll: 'Please fill all fields', updated: '✓ Information updated', started: '✓ Assessment started',
+    exportWord: 'Export Word', searchPh: '🔍 Search tests...', wordToast: '✓ Word file downloaded',
+    wordNoMeta: 'No assessment data', noFailed: 'No failed vulnerabilities to export.',
+    bio1: 'My name is Mohammad Javad Joshani (known as MR.MTwoJ). I was born in 1992 in Tehran, Iran. I work in the field of Information Technology and focus on areas related to cybersecurity, systems, and software development.',
+    bio2: 'I have a strong interest in cybersecurity and low-level programming. My main areas of focus include exploit development, vulnerability research, and understanding how software and operating systems work internally.',
+    bio3: 'Alongside security research, I also work with web technologies, Linux servers, and networking. Cybersecurity for me is not only a profession but also a long-term passion.',
+  },
+  zh: {
+    setupTitle: '开始新评估', setupSubtitle: '输入目标系统信息', systemName: '系统名称', systemNamePh: '例如：客户门户', url: 'URL 地址', version: '评估版本', start: '开始评估', orLoadFile: '或者如果您有已保存的评估', loadFileBtn: '📂 加载评估文件', aboutUs: '关于我们', appTitle: 'OWASP 安全评估', versionLabel: '版本：', overallProgress: '总体进度', pass: '通过', fail: '失败', pending: '待处理', madeBy: 'MR.MTwoJ 制作', description: '漏洞描述', objectives: '测试目标', remediation: '修复方法', payloads: '负载和测试方法', severity: '严重程度', status: '评估状态', poc: 'POC 图片（请求/响应）', notes: '备注', notStarted: '未开始', na: '不适用', critical: '严重', high: '高危', medium: '中危', low: '低危', prev: '上一个', next: '下一个', save: '保存评估', load: '加载', editMeta: '编辑信息', reset: '重置', test: '测试', of: '/', aboutTitle: '关于作者', pocUploadHint: '点击添加图片或将文件拖到此处', pocHint: 'PNG、JPG — 以 Base64 存储', notesPh: '在此记录您的观察、证据和笔记...', resetConfirm: '确定吗？所有进度将被清除。', savedToast: '✓ 评估文件已下载', loadedToast: '✓ 评估已加载', resetToast: '✓ 评估已重新开始', imageAdded: '✓ 图片已添加', fillAll: '请填写所有字段', updated: '✓ 信息已更新', started: '✓ 评估已开始', exportWord: '导出 Word', searchPh: '🔍 搜索测试...', wordToast: '✓ Word 文件已下载', wordNoMeta: '无评估数据', noFailed: '没有失败的漏洞可导出。',
+    bio1: '我叫 Mohammad Javad Joshani（代号 MR.MTwoJ）。1992 年出生于伊朗德黑兰。从事信息技术领域工作，专注于网络安全、系统和软件开发。', bio2: '我对网络安全和底层编程有浓厚兴趣。主要关注领域包括漏洞利用开发、漏洞研究以及理解软件和操作系统的内部工作原理。', bio3: '除了安全研究，我还从事 Web 技术、Linux 服务器和网络方面的工作。网络安全对我来说不仅是一种职业，更是一种长期的热情。',
+  },
+  ru: {
+    setupTitle: 'Начать новую оценку', setupSubtitle: 'Введите информацию о системе', systemName: 'Имя системы', systemNamePh: 'напр.: Портал клиентов', url: 'URL адрес', version: 'Версия оценки', start: 'Начать оценку', orLoadFile: 'Или если у вас есть сохранённая оценка', loadFileBtn: '📂 Загрузить файл оценки', aboutUs: 'О нас', appTitle: 'Оценка безопасности OWASP', versionLabel: 'Версия:', overallProgress: 'Общий прогресс', pass: 'Пройдено', fail: 'Провалено', pending: 'В ожидании', madeBy: 'Создано MR.MTwoJ', description: 'Описание уязвимости', objectives: 'Цели теста', remediation: 'Метод исправления', payloads: 'Полезная нагрузка и метод тестирования', severity: 'Уровень серьёзности', status: 'Статус оценки', poc: 'Изображения POC (Запрос/Ответ)', notes: 'Заметки', notStarted: 'Не начато', na: 'Не применимо', critical: 'Критический', high: 'Высокий', medium: 'Средний', low: 'Низкий', prev: 'Назад', next: 'Далее', save: 'Сохранить оценку', load: 'Загрузить', editMeta: 'Редактировать', reset: 'Сброс', test: 'Тест', of: 'из', aboutTitle: 'Об авторе', pocUploadHint: 'Нажмите чтобы добавить изображение', pocHint: 'PNG, JPG — хранится в Base64', notesPh: 'Запишите здесь свои наблюдения...', resetConfirm: 'Вы уверены? Весь прогресс будет удалён.', savedToast: '✓ Файл оценки загружен', loadedToast: '✓ Оценка загружена', resetToast: '✓ Оценка перезапущена', imageAdded: '✓ Изображение добавлено', fillAll: 'Заполните все поля', updated: '✓ Информация обновлена', started: '✓ Оценка начата', exportWord: 'Экспорт Word', searchPh: '🔍 Поиск тестов...', wordToast: '✓ Файл Word загружен', wordNoMeta: 'Нет данных оценки', noFailed: 'Нет проваленных уязвимостей для экспорта.',
+    bio1: 'Меня зовут Мохаммад Джавад Джошани (известен как MR.MTwoJ). Родился в 1992 году в Тегеране, Иран. Работаю в области информационных технологий и специализируюсь на кибербезопасности, системах и разработке ПО.', bio2: 'У меня большой интерес к кибербезопасности и низкоуровневому программированию. Основные направления — разработка эксплойтов, исследование уязвимостей и понимание внутренней работы ПО и ОС.', bio3: 'Помимо исследований безопасности, я работаю с веб-технологиями, серверами Linux и сетями. Кибербезопасность для меня — это не только профессия, но и долгосрочная страсть.',
+  },
+  la: {
+    setupTitle: 'Incipere Novam Aestimationem', setupSubtitle: 'Inserere informationem systematis', systemName: 'Nomen Systematis', systemNamePh: 'ex.: Porta Clientium', url: 'Inscriptio URL', version: 'Versio Aestimationis', start: 'Incipere Aestimationem', orLoadFile: 'Vel si habes aestimationem servatam', loadFileBtn: '📂 Onerare Fasciculum', aboutUs: 'De Nobis', appTitle: 'Aestimatio Securitatis OWASP', versionLabel: 'Versio:', overallProgress: 'Progressus Generalis', pass: 'Transitus', fail: 'Defectus', pending: 'Pendens', madeBy: 'Factus a MR.MTwoJ', description: 'Descriptio Vulnerabilitatis', objectives: 'Scopos Examinationis', remediation: 'Methodus Correctionis', payloads: 'Onus et Methodus Examinationis', severity: 'Gradus Severitatis', status: 'Status Aestimationis', poc: 'Imagines POC', notes: 'Notae', notStarted: 'Non Inceptus', na: 'Non Applicabilis', critical: 'Criticus', high: 'Altus', medium: 'Medius', low: 'Humilis', prev: 'Prior', next: 'Posterior', save: 'Servare', load: 'Onerare', editMeta: 'Editare', reset: 'Renovare', test: 'Examen', of: 'ex', aboutTitle: 'De Auctore', pocUploadHint: 'Preme ut imaginem addas', pocHint: 'PNG, JPG — in Base64 servatur', notesPh: 'Scribe observationes tuas hic...', resetConfirm: 'Certusne es? Omnis progressus delebitur.', savedToast: '✓ Fasciculus servatus est', loadedToast: '✓ Aestimatio onerata est', resetToast: '✓ Aestimatio renovata est', imageAdded: '✓ Imago addita est', fillAll: 'Omnia campi complenda sunt', updated: '✓ Informationem renovata est', started: '✓ Aestimatio incepta est', exportWord: 'Export Word', searchPh: '🔍 Search tests...', wordToast: '✓ Word file downloaded', wordNoMeta: 'Nulla notitia', noFailed: 'Nulla vulnerabilitates defecerunt.',
+    bio1: 'Nomen mihi est Mohammad Javad Joshani (cognomine MR.MTwoJ). Natus sum anno MCMXCII Teherani in Irania. In campo Technologiae Informationis operor, in cybersecuritate, systematibus et evolutione programmatum.', bio2: 'Magnum studium habeo in cybersecuritate et programmatione inferioris gradus. Meae areae principales sunt evolutio exploit, investigatio vulnerabilitatum et intellectus operis interni programmatum et systematum operandorum.', bio3: 'Praeter investigationem securitatis, etiam cum technologiis interretialibus, servitoribus Linux et retibus operor. Cybersecuritas mihi non solum professio, sed etiam studium diuturnum est.',
+  },
+  hi: {
+    setupTitle: 'नया मूल्यांकन शुरू करें', setupSubtitle: 'लक्ष्य प्रणाली की जानकारी दर्ज करें', systemName: 'सिस्टम नाम', systemNamePh: 'उदा.: ग्राहक पोर्टल', url: 'URL पता', version: 'मूल्यांकन संस्करण', start: 'मूल्यांकन शुरू करें', orLoadFile: 'या यदि आपके पास सहेजा गया मूल्यांकन है', loadFileBtn: '📂 फ़ाइल लोड करें', aboutUs: 'हमारे बारे में', appTitle: 'OWASP सुरक्षा मूल्यांकन', versionLabel: 'संस्करण:', overallProgress: 'कुल प्रगति', pass: 'उत्तीर्ण', fail: 'विफल', pending: 'लंबित', madeBy: 'MR.MTwoJ द्वारा निर्मित', description: 'भेद्यता विवरण', objectives: 'परीक्षण उद्देश्य', remediation: 'उपचार विधि', payloads: 'पेलोड और परीक्षण विधि', severity: 'गंभीरता स्तर', status: 'मूल्यांकन स्थिति', poc: 'POC चित्र', notes: 'टिप्पणियाँ', notStarted: 'शुरू नहीं हुआ', na: 'लागू नहीं', critical: 'गंभीर', high: 'उच्च', medium: 'मध्यम', low: 'निम्न', prev: 'पिछला', next: 'अगला', save: 'सहेजें', load: 'लोड करें', editMeta: 'जानकारी संपादित करें', reset: 'रीसेट', test: 'परीक्षण', of: 'में से', aboutTitle: 'लेखक के बारे में', pocUploadHint: 'चित्र जोड़ने के लिए क्लिक करें', pocHint: 'PNG, JPG — Base64 में संग्रहीत', notesPh: 'अपनी टिप्पणियाँ यहाँ दर्ज करें...', resetConfirm: 'क्या आप सुनिश्चित हैं? सारी प्रगति मिटा दी जाएगी।', savedToast: '✓ मूल्यांकन फ़ाइल डाउनलोड हुई', loadedToast: '✓ मूल्यांकन लोड हुआ', resetToast: '✓ मूल्यांकन पुनः आरंभ', imageAdded: '✓ चित्र जोड़ा गया', fillAll: 'कृपया सभी फ़ील्ड भरें', updated: '✓ जानकारी अपडेट हुई', started: '✓ मूल्यांकन शुरू', exportWord: 'Word निर्यात', searchPh: '🔍 परीक्षण खोजें...', wordToast: '✓ Word फ़ाइल डाउनलोड हुई', wordNoMeta: 'कोई डेटा नहीं', noFailed: 'निर्यात करने के लिए कोई विफल भेद्यता नहीं है।',
+    bio1: 'मेरा नाम मोहम्मद जवाद जोशनी (MR.MTwoJ) है। मेरा जन्म 1992 में तेहरान, ईरान में हुआ। मैं सूचना प्रौद्योगिकी के क्षेत्र में काम करता हूँ और साइबर सुरक्षा, सिस्टम और सॉफ़्टवेयर विकास पर ध्यान केंद्रित करता हूँ।', bio2: 'मुझे साइबर सुरक्षा और निम्न-स्तरीय प्रोग्रामिंग में गहरी रुचि है। मुख्य क्षेत्रों में एक्सप्लॉइट विकास, भेद्यता अनुसंधान और सॉफ़्टवेयर आंतरिक कार्यप्रणाली शामिल हैं।', bio3: 'सुरक्षा अनुसंधान के साथ-साथ मैं वेब तकनीक, Linux सर्वर और नेटवर्किंग पर भी काम करता हूँ। साइबर सुरक्षा मेरे लिए केवल पेशा नहीं, बल्कि दीर्घकालिक जुनून है।',
+  },
+  ar: {
+    setupTitle: 'بدء تقييم جديد', setupSubtitle: 'أدخل معلومات النظام المستهدف', systemName: 'اسم النظام', systemNamePh: 'مثال: بوابة العملاء', url: 'عنوان URL', version: 'إصدار التقييم', start: 'بدء التقييم', orLoadFile: 'أو إذا كان لديك تقييم محفوظ', loadFileBtn: '📂 تحميل ملف التقييم', aboutUs: 'من نحن', appTitle: 'تقييم أمان OWASP', versionLabel: 'الإصدار:', overallProgress: 'التقدم الإجمالي', pass: 'نجح', fail: 'فشل', pending: 'قيد الانتظار', madeBy: 'صنع بواسطة MR.MTwoJ', description: 'وصف الثغرة', objectives: 'أهداف الاختبار', remediation: 'طريقة الإصلاح', payloads: 'الحمولة وطريقة الاختبار', severity: 'مستوى الخطورة', status: 'حالة التقييم', poc: 'صور POC (طلب/استجابة)', notes: 'ملاحظات', notStarted: 'لم يبدأ', na: 'غير قابل للتطبيق', critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض', prev: 'السابق', next: 'التالي', save: 'حفظ التقييم', load: 'تحميل', editMeta: 'تعديل المعلومات', reset: 'إعادة تعيين', test: 'اختبار', of: 'من', aboutTitle: 'عن المؤلف', pocUploadHint: 'انقر لإضافة صورة', pocHint: 'PNG, JPG — يُخزن بصيغة Base64', notesPh: 'سجّل ملاحظاتك هنا...', resetConfirm: 'هل أنت متأكد؟ سيتم مسح كل التقدم.', savedToast: '✓ تم تنزيل ملف التقييم', loadedToast: '✓ تم تحميل التقييم', resetToast: '✓ تم إعادة بدء التقييم', imageAdded: '✓ تمت إضافة الصورة', fillAll: 'يرجى ملء جميع الحقول', updated: '✓ تم تحديث المعلومات', started: '✓ بدأ التقييم', exportWord: 'تصدير Word', searchPh: '🔍 بحث في الاختبارات...', wordToast: '✓ تم تنزيل ملف Word', wordNoMeta: 'لا توجد بيانات', noFailed: 'لا توجد ثغرات فاشلة للتصدير.',
+    bio1: 'اسمي محمد جواد جوشني (المعروف بـ MR.MTwoJ). ولدت عام 1992 في طهران، إيران. أعمل في مجال تكنولوجيا المعلومات وأركز على الأمن السيبراني والأنظمة وتطوير البرمجيات.', bio2: 'لدي اهتمام قوي بالأمن السيبراني والبرمجة منخفضة المستوى. تشمل مجالات تركيزي الرئيسية تطوير الاستغلال، وبحوث الثغرات، وفهم كيفية عمل البرمجيات وأنظمة التشغيل داخلياً.', bio3: 'إلى جانب بحوث الأمن، أعمل أيضاً مع تقنيات الويب وخوادم Linux والشبكات. الأمن السيبراني بالنسبة لي ليس مجرد مهنة، بل شغف طويل الأمد.',
+  }
+};
+
+let currentLang = localStorage.getItem('wstg_lang') || 'fa';
+
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key; }
+
+function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+    const bioEl = document.getElementById('aboutBio');
+    if (bioEl) bioEl.innerHTML = `<p>${t('bio1')}</p><p>${t('bio2')}</p><p>${t('bio3')}</p>`;
+    const nameEl = document.getElementById('aboutName');
+    if (nameEl) nameEl.textContent = currentLang === 'fa' || currentLang === 'ar' ? 'محمد جواد جوشنی' : 'Mohammad Javad Joshani';
+    document.getElementById('langSelectSetup').value = currentLang;
+    document.getElementById('langSelectSidebar').value = currentLang;
+    const isRtl = RTL_LANGS.includes(currentLang);
+    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+    document.documentElement.lang = currentLang;
+}
+
+function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('wstg_lang', lang);
+    applyI18n();
+    if (meta) { renderSystemInfo(); render(); }
+}
+
+function loc(obj, base) {
+    if (!obj) return '';
+    const suffix = currentLang;
+    return obj[`${base}_${suffix}`] || obj[`${base}_en`] || obj[`${base}_fa`] || '';
+}
+function locArr(obj, base) {
+    if (!obj) return [];
+    const suffix = currentLang;
+    return obj[`${base}_${suffix}`] || obj[`${base}_en`] || obj[`${base}_fa`] || [];
+}
+
+/* ═══════════════════════════════════════════════════════════
+   App state
+   ═══════════════════════════════════════════════════════════ */
+const STORAGE_KEY_META = 'wstg_meta_v3';
+const STORAGE_KEY_DATA = 'wstg_assessment_v3';
+const SEVERITY_ICON = { critical:'🔴', high:'🟠', medium:'🟡', low:'🔵' };
+const SEVERITY_CLS = { critical:'badge-sev-critical', high:'badge-sev-high', medium:'badge-sev-medium', low:'badge-sev-low' };
+
+let checklistData = null;
+let flatTests = [];
+let categoryMap = [];
+let currentIndex = 0;
+let expandedCats = {};
+let meta = null;
+
+/* ═══════════════════════════════════════════════════════════
+   Load checklist
+   ═══════════════════════════════════════════════════════════ */
+async function loadChecklist() {
+    try {
+        const res = await fetch('checklist.json');
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        checklistData = await res.json();
+    } catch(e) {
+        console.warn('checklist.json بارگذاری نشد، استفاده از داده نمونه.', e);
+        checklistData = getSampleData();
+    }
+    buildFlatTests();
+    bootApp();
+}
+
+function getSampleData() {
+    const cats = ['A01','A02','A03','A04','A05','A06','A07','A08','A09','A10'];
+    const names = {
+        A01:{en:'Broken Access Control',fa:'کنترل دسترسی شکسته',zh:'访问控制失效',ru:'Нарушение контроля доступа',la:'Contritio Imperii Accessus',hi:'टूटा हुआ एक्सेस कंट्रोल',ar:'فشل التحكم في الوصول'},
+        A02:{en:'Security Misconfiguration',fa:'پیکربندی نادرست امنیتی',zh:'安全配置错误',ru:'Неправильная конфигурация',la:'Configuratio Vitiosa',hi:'सुरक्षा कॉन्फ़िगरेशन त्रुटि',ar:'سوء التكوين الأمني'},
+        A03:{en:'Software Supply Chain Failures',fa:'خرابی‌های زنجیره تأمین',zh:'软件供应链故障',ru:'Сбои цепочки поставок',la:'Defectus Catenae',hi:'आपूर्ति श्रृंखला विफलता',ar:'إخفاقات سلسلة التوريد'},
+        A04:{en:'Cryptographic Failures',fa:'خرابی‌های رمزنگاری',zh:'加密失效',ru:'Криптографические сбои',la:'Defectus Cryptographici',hi:'क्रिप्टोग्राफिक विफलता',ar:'إخفاقات التشفير'},
+        A05:{en:'Injection',fa:'تزریق',zh:'注入',ru:'Внедрение',la:'Injectio',hi:'इंजेक्शन',ar:'الحقن'},
+        A06:{en:'Insecure Design',fa:'طراحی ناامن',zh:'不安全的设计',ru:'Небезопасный дизайн',la:'Designatio Insecure',hi:'असुरक्षित डिज़ाइन',ar:'تصميم غير آمن'},
+        A07:{en:'Authentication Failures',fa:'خرابی‌های احراز هویت',zh:'身份验证失效',ru:'Сбои аутентификации',la:'Defectus Authenticationis',hi:'प्रमाणीकरण विफलता',ar:'إخفاقات المصادقة'},
+        A08:{en:'Software or Data Integrity Failures',fa:'خرابی‌های یکپارچگی',zh:'完整性失效',ru:'Сбои целостности',la:'Defectus Integritatis',hi:'अखंडता विफलता',ar:'إخفاقات السلامة'},
+        A09:{en:'Security Logging and Alerting Failures',fa:'خرابی‌های ثبت و هشدار',zh:'日志告警失效',ru:'Сбои логирования',la:'Defectus Notationis',hi:'लॉगिंग विफलता',ar:'إخفاقات التسجيل'},
+        A10:{en:'Mishandling of Exceptional Conditions',fa:'مدیریت نادرست شرایط استثنایی',zh:'异常处理不当',ru:'Неправильная обработка исключений',la:'Mala Tractatio Exceptionum',hi:'असाधारण स्थिति दुरुपयोग',ar:'سوء التعامل مع الاستثناءات'}
+    };
+    const out = { version:'2.0', categories:{} };
+    cats.forEach(c => {
+        out.categories[c] = {
+            id: c,
+            name_en: names[c].en, name_fa: names[c].fa, name_zh: names[c].zh,
+            name_ru: names[c].ru, name_la: names[c].la, name_hi: names[c].hi, name_ar: names[c].ar,
+            tests: []
+        };
+    });
+    out.categories.A01.tests.push({
+        id:'WSTG-ATHZ-01', wstg_code:'WSTG-ATHZ-01',
+        name_fa:'آزمون پیمایش دایرکتوری', name_en:'Testing Directory Traversal',
+        severity:'high', enabled:true,
+        description_fa:'شناسایی آسیب‌پذیری‌هایی که به مهاجم اجازه دسترسی به فایل‌های خارج از ریشه وب را می‌دهد.',
+        description_en:'Identify vulnerabilities that allow access to files outside the web root.',
+        remediation_fa:'اعتبارسنجی ورودی، استفاده از whitelist مسیرهای مجاز.',
+        remediation_en:'Input validation, use path allowlist.',
+        objectives_fa:['شناسایی نقاط ورودی مسیر فایل.'],
+        objectives_en:['Identify file path input vectors.'],
+        payloads_fa:['../../../etc/passwd','..\\..\\..\\windows\\win.ini','%2e%2e%2f%2e%2e%2f%2e%2e%2fetc/passwd'],
+        payloads_en:['../../../etc/passwd','..\\..\\..\\windows\\win.ini']
+    });
+    return out;
+}
+
+function buildFlatTests() {
+    flatTests = [];
+    categoryMap = [];
+    for (const catId in checklistData.categories) {
+        const cat = checklistData.categories[catId];
+        const enabled = (cat.tests || []).filter(t => t.enabled !== false);
+        categoryMap.push({ id: catId, cat, count: enabled.length, total: (cat.tests||[]).length });
+        enabled.forEach(test => {
+            flatTests.push({
+                ...test,
+                categoryId: catId,
+                categoryCat: cat,
+                severity: test.severity || 'medium',
+                poc_images: test.poc_images || [],
+                status: 'not_started', notes: ''
+            });
+        });
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Boot
+   ═══════════════════════════════════════════════════════════ */
+function bootApp() {
+    applyI18n();
+    const savedMeta = loadMeta();
+    if (savedMeta) { meta = savedMeta; loadProgress(); showAssessment(); }
+    else { showSetup(); }
+}
+
+function showSetup() {
+    document.getElementById('setupOverlay').classList.remove('hidden');
+    document.getElementById('app').classList.add('hidden');
+    if (meta) {
+        document.getElementById('inputSystemName').value = meta.systemName || '';
+        document.getElementById('inputUrl').value = meta.url || '';
+        document.getElementById('inputVersion').value = meta.version || '';
+    }
+    setTimeout(() => document.getElementById('inputSystemName').focus(), 100);
+}
+
+function showAssessment() {
+    document.getElementById('setupOverlay').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    if (flatTests.length) expandedCats[flatTests[currentIndex].categoryId] = true;
+    renderSystemInfo();
+    render();
+}
+
+function renderSystemInfo() {
+    document.getElementById('sysName').textContent = meta.systemName || '—';
+    const urlEl = document.getElementById('sysUrl');
+    let urlDisplay = meta.url || '—';
+    try { urlDisplay = new URL(meta.url).host || meta.url; } catch(e) {}
+    urlEl.textContent = urlDisplay;
+    urlEl.title = meta.url || '';
+    document.getElementById('sysVersion').textContent = meta.version || '—';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Persist
+   ═══════════════════════════════════════════════════════════ */
+function saveMeta() { try { localStorage.setItem(STORAGE_KEY_META, JSON.stringify(meta)); } catch(e){} }
+function loadMeta() { try { const r = localStorage.getItem(STORAGE_KEY_META); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
+function saveProgress() {
+    const data = flatTests.map(t => ({ id:t.id, status:t.status, notes:t.notes, poc_images:t.poc_images, severity:t.severity }));
+    try { localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data)); } catch(e){}
+}
+function loadProgress() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY_DATA);
+        if (!raw) return;
+        applyResults(JSON.parse(raw));
+    } catch(e){}
+}
+function applyResults(results) {
+    const map = new Map(results.map(r => [r.id, r]));
+    flatTests.forEach(t => {
+        if (map.has(t.id)) {
+            const r = map.get(t.id);
+            t.status = r.status || 'not_started';
+            t.notes = r.notes || '';
+            t.poc_images = r.poc_images || t.poc_images || [];
+            if (r.severity) t.severity = r.severity;
+        }
+    });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Render
+   ═══════════════════════════════════════════════════════════ */
+function catDisplayName(cat) {
+    if (!cat) return '';
+    return cat['name_'+currentLang] || cat.name_en || cat.name_fa || cat.id;
+}
+
+function renderSidebar() {
+    const nav = document.getElementById('categoriesNav');
+    const searchEl = document.getElementById('sidebarSearch');
+    const query = (searchEl?.value || '').trim().toLowerCase();
+    nav.innerHTML = '';
+
+    categoryMap.forEach(cm => {
+        if (cm.count === 0) return;
+        const cat = cm.cat;
+        const catTests = flatTests.filter(t => t.categoryId === cm.id);
+
+        const filtered = query
+            ? catTests.filter(t => {
+                const name = (loc(t, 'name') || '').toLowerCase();
+                const id = (t.id || '').toLowerCase();
+                const code = (t.wstg_code || '').toLowerCase();
+                return name.includes(query) || id.includes(query) || code.includes(query);
+            })
+            : catTests;
+
+        if (query && filtered.length === 0) return;
+
+        const isExpanded = expandedCats[cm.id] || (query && filtered.length > 0);
+
+        const group = document.createElement('div');
+        group.className = 'cat-group' + (isExpanded ? ' expanded' : '');
+
+        group.innerHTML = `
+            <div class="cat-header">
+                <span class="cat-id">${cm.id}</span>
+                <span class="cat-name">${catDisplayName(cat)}</span>
+                <span class="cat-count">${filtered.length}</span>
+                <span class="cat-toggle"></span>
+            </div>
+            <div class="cat-tests"></div>`;
+
+        group.querySelector('.cat-header').addEventListener('click', () => {
+            expandedCats[cm.id] = !expandedCats[cm.id];
+            group.classList.toggle('expanded');
+        });
+
+        const testsContainer = group.querySelector('.cat-tests');
+        filtered.forEach(test => {
+            const idx = flatTests.indexOf(test);
+            const item = document.createElement('div');
+            item.className = 'test-item';
+            if (idx === currentIndex) item.classList.add('active');
+            if (test.status === 'pass') item.classList.add('pass');
+            if (test.status === 'fail') item.classList.add('fail');
+            if (test.status === 'na') item.classList.add('na');
+            item.innerHTML = `<span class="test-dot"></span><span>${escapeHtml(loc(test, 'name') || test.id)}</span>`;
+            item.addEventListener('click', () => {
+                currentIndex = idx;
+                expandedCats[cm.id] = true;
+                render();
+            });
+            testsContainer.appendChild(item);
+        });
+
+        nav.appendChild(group);
+    });
+}
+
+function renderTest() {
+    if (!flatTests.length) {
+        document.getElementById('testCard').innerHTML = `<div style="text-align:center;padding:80px 20px;color:var(--gray-400);"><div style="font-size:2rem;margin-bottom:12px;">📋</div><p>هیچ تست فعالی در چک‌لیست وجود ندارد.</p></div>`;
+        return;
+    }
+    const test = flatTests[currentIndex];
+    const card = document.getElementById('testCard');
+    const sev = test.severity || 'medium';
+    const objectives = locArr(test, 'objectives');
+    const payloads = locArr(test, 'payloads');
+    const desc = loc(test, 'description');
+    const rem = loc(test, 'remediation');
+
+    card.innerHTML = `
+        <div class="test-header">
+            <div class="test-meta">
+                <span class="badge badge-blue">${test.categoryId} · ${escapeHtml(catDisplayName(test.categoryCat))}</span>
+                <span class="badge badge-orange">${escapeHtml(test.wstg_code || test.id)}</span>
+                <span class="badge ${SEVERITY_CLS[sev]}">${SEVERITY_ICON[sev]} ${t(sev)}</span>
+            </div>
+            <h1 class="test-title">${escapeHtml(loc(test,'name') || test.id)}</h1>
+            ${test.name_en && currentLang !== 'en' ? `<div class="test-subtitle">${escapeHtml(test.name_en)}</div>` : ''}
+        </div>
+        ${desc ? `<div class="section"><div class="section-title">${t('description')}</div><div class="description-box">${escapeHtml(desc)}</div></div>` : ''}
+        ${objectives.length ? `<div class="section"><div class="section-title">${t('objectives')}</div><ul class="objectives-list">${objectives.map((o,i)=>`<li><span class="objective-num">${i+1}</span><span>${escapeHtml(o)}</span></li>`).join('')}</ul></div>` : ''}
+        ${payloads.length ? `<div class="section"><div class="section-title">${t('payloads')}</div><div class="payload-box"><code>${payloads.map(p=>escapeHtml(p)).join('\n\n')}</code></div></div>` : ''}
+        ${rem ? `<div class="section"><div class="section-title">${t('remediation')}</div><div class="remediation-box">${escapeHtml(rem)}</div></div>` : ''}
+        <div class="section"><div class="section-title">${t('severity')}</div><div class="severity-group">${['critical','high','medium','low'].map(s=>`<label class="severity-option"><input type="radio" name="severity" value="${s}" ${test.severity===s?'checked':''}><div class="severity-option-content"><div class="severity-icon">${SEVERITY_ICON[s]}</div><div class="severity-label">${t(s)}</div></div></label>`).join('')}</div></div>
+        <div class="section"><div class="section-title">${t('status')}</div><div class="status-group">${[['not_started','⏳'],['pass','✓'],['fail','✕'],['na','—']].map(([v,i])=>`<label class="status-option"><input type="radio" name="status" value="${v}" ${test.status===v?'checked':''}><div class="status-option-content"><div class="status-icon">${i}</div><div class="status-label">${t(v==='not_started'?'notStarted':v)}</div></div></label>`).join('')}</div></div>
+        <div class="section"><div class="section-title">${t('poc')}</div><div class="poc-upload-area" id="pocUploadArea"><input type="file" id="pocInput" accept="image/*" multiple><div style="color:var(--gray-400);"><div style="font-size:1.8rem;margin-bottom:6px;">🖼️</div><div>${t('pocUploadHint')}</div><div style="font-size:.72rem;margin-top:4px;">${t('pocHint')}</div></div></div><div class="poc-grid" id="pocGrid"></div></div>
+        <div class="section"><div class="section-title">${t('notes')}</div><textarea class="notes-textarea" id="notesInput" placeholder="${escapeHtml(t('notesPh'))}">${escapeHtml(test.notes||'')}</textarea></div>
+    `;
+
+    document.querySelectorAll('input[name="severity"]').forEach(inp => inp.addEventListener('change', e => {
+        test.severity = e.target.value;
+        saveProgress();
+        const badge = card.querySelector('.test-meta .badge:last-child');
+        if (badge) { badge.className = 'badge '+SEVERITY_CLS[e.target.value]; badge.textContent = `${SEVERITY_ICON[e.target.value]} ${t(e.target.value)}`; }
+    }));
+    document.querySelectorAll('input[name="status"]').forEach(inp => inp.addEventListener('change', e => {
+        test.status = e.target.value;
+        saveProgress();
+        renderSidebar(); renderStats();
+    }));
+    document.getElementById('notesInput').addEventListener('input', e => { test.notes = e.target.value; saveProgress(); });
+
+    const uploadArea = document.getElementById('pocUploadArea');
+    const fileInput = document.getElementById('pocInput');
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor='var(--blue-400)'; });
+    uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor='var(--gray-200)'; });
+    uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.style.borderColor='var(--gray-200)'; handlePocFiles(e.dataTransfer.files); });
+    fileInput.addEventListener('change', e => handlePocFiles(e.target.files));
+
+    renderPocGrid(test);
+    card.style.animation = 'none';
+    requestAnimationFrame(() => { card.style.animation = 'slideIn .4s cubic-bezier(.4,0,.2,1)'; });
+    document.getElementById('content').scrollTop = 0;
+}
+
+function handlePocFiles(files) {
+    const test = flatTests[currentIndex];
+    Array.from(files).forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            test.poc_images.push({ label: file.name.length>20?file.name.slice(0,20)+'…':file.name, data: ev.target.result });
+            saveProgress(); renderPocGrid(test); showToast(t('imageAdded'),'success');
+        };
+        reader.readAsDataURL(file);
+    });
+}
+function renderPocGrid(test) {
+    const grid = document.getElementById('pocGrid'); if (!grid) return;
+    grid.innerHTML = '';
+    test.poc_images.forEach((poc, i) => {
+        const item = document.createElement('div');
+        item.className = 'poc-item';
+        item.innerHTML = `<img src="${poc.data}" alt="${escapeHtml(poc.label)}"><div class="poc-label">${escapeHtml(poc.label)}</div><button class="poc-remove" data-idx="${i}">✕</button>`;
+        item.querySelector('.poc-remove').addEventListener('click', e => { e.stopPropagation(); test.poc_images.splice(i,1); saveProgress(); renderPocGrid(test); });
+        grid.appendChild(item);
+    });
+}
+
+function renderStats() {
+    const total = flatTests.length;
+    const pass = flatTests.filter(t => t.status==='pass').length;
+    const fail = flatTests.filter(t => t.status==='fail').length;
+    const na = flatTests.filter(t => t.status==='na').length;
+    const pending = total - pass - fail - na;
+    document.getElementById('statPass').textContent = pass;
+    document.getElementById('statFail').textContent = fail;
+    document.getElementById('statPending').textContent = pending;
+    const done = pass + fail + na;
+    const percent = total ? Math.round((done/total)*100) : 0;
+    document.getElementById('overallPercent').textContent = percent+'%';
+    document.getElementById('overallFill').style.width = percent+'%';
+}
+
+function renderTopbar() {
+    if (!flatTests.length) return;
+    const test = flatTests[currentIndex];
+    document.getElementById('breadcrumbCatId').textContent = test.categoryId;
+    document.getElementById('breadcrumbCatName').textContent = catDisplayName(test.categoryCat);
+}
+function updateNavButtons() {
+    document.getElementById('prevBtn').disabled = currentIndex === 0;
+    document.getElementById('nextBtn').disabled = currentIndex === flatTests.length-1;
+}
+function render() {
+    renderTopbar(); renderTest(); renderSidebar(); renderStats();
+    document.getElementById('counterCurrent').textContent = currentIndex+1;
+    document.getElementById('counterTotal').textContent = flatTests.length;
+    updateNavButtons();
+    setTimeout(() => { const a = document.querySelector('.test-item.active'); if (a) a.scrollIntoView({block:'nearest',behavior:'smooth'}); }, 50);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Save/Load/Reset
+   ═══════════════════════════════════════════════════════════ */
+function downloadAssessment() {
+    if (!meta) return;
+    const data = {
+        tool:'OWASP WSTG Assessment', toolVersion:'3.0', exportedAt:new Date().toISOString(),
+        meta:{ systemName: meta.systemName, url: meta.url, version: meta.version },
+        results: flatTests.map(t => ({
+            id: t.id, wstg_code: t.wstg_code || t.id, category: t.categoryId,
+            name: t.name_en || t.name_fa, severity: t.severity,
+            status: t.status, notes: t.notes, poc_images: t.poc_images
+        }))
+    };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const slug = (meta.systemName||'assessment').trim().replace(/[^\u0600-\u06FFa-zA-Z0-9-]+/g,'-').replace(/^-+|-+$/g,'')||'assessment';
+    a.href = url; a.download = `wstg-${slug}-v${meta.version||'0'}-${new Date().toISOString().slice(0,10)}.json`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast(t('savedToast'),'success');
+}
+
+function importAssessment(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        let data; try { data = JSON.parse(ev.target.result); } catch(e){ showToast('Invalid JSON','error'); return; }
+        if (!data.meta || !data.results) { showToast('Invalid file structure','error'); return; }
+        meta = { systemName: data.meta.systemName, url: data.meta.url, version: data.meta.version };
+        saveMeta(); applyResults(data.results); saveProgress();
+        currentIndex = 0; showAssessment();
+        showToast(t('loadedToast')+` (${meta.systemName})`, 'success');
+    };
+    reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Export Word (فقط موارد رد شده - هر کدام در یک صفحه)
+   ═══════════════════════════════════════════════════════════ */
+function exportWord() {
+    if (!meta) { showToast(t('wordNoMeta'), 'error'); return; }
+
+    // فقط تست‌های با وضعیت fail
+    const failedTests = flatTests.filter(t => t.status === 'fail');
+    if (!failedTests.length) {
+        showToast(t('noFailed'), 'error');
+        return;
+    }
+
+    const L = currentLang === 'fa' ? {
+        vulName: 'نام آسیب پذیری',
+        owaspTitle: 'عنوان متداول OWASP',
+        sensitiveErr: 'پیام خطای حاوی اطلاعات حساس',
+        severity: 'سطح شدت',
+        cweId: 'شناسه CWE',
+        address: 'آدرس آسیب پذیری',
+        description: 'شرح آسیب پذیری',
+        exploitScenario: 'توضیح آسیب پذیری سناریو اجرایی',
+        remediation: 'روش رفع آسیب پذیری',
+        objectives: 'اهداف آزمون',
+        pocs: 'مستندات تصویری',
+        autoFill: 'توسط خود ارزیاب تکمیل می گردد'
+    } : {
+        vulName: 'Vulnerability Name',
+        owaspTitle: 'OWASP Common Title',
+        sensitiveErr: 'Sensitive Error Message',
+        severity: 'Severity Level',
+        cweId: 'CWE ID',
+        address: 'Vulnerability Address',
+        description: 'Vulnerability Description',
+        exploitScenario: 'Exploit Scenario Description',
+        remediation: 'Remediation Method',
+        objectives: 'Test Objectives',
+        pocs: 'Visual Documentation',
+        autoFill: 'To be completed by the assessor'
+    };
+
+    let pages = failedTests.map(test => {
+        const catName = catDisplayName(test.categoryCat);
+        const testName = loc(test, 'name') || test.id;
+        const desc = loc(test, 'description') || '';
+        const rem = loc(test, 'remediation') || '';
+        const objectives = locArr(test, 'objectives').join('<br>');
+        
+        // استفاده از یادداشت ها برای سناریو اجرایی، اگر خالی بود متن پیش فرض
+        const notes = test.notes.trim() ? escapeHtml(test.notes).replace(/\n/g, '<br>') : `<span style="color:#666;">${L.autoFill}</span>`;
+
+        // تصاویر
+        let pocs = '';
+        if (test.poc_images && test.poc_images.length > 0) {
+            pocs = test.poc_images.map(img => `<img src="${img.data}" style="max-width:100%; height:auto; margin:5px; border:1px solid #ccc;" />`).join('');
+        } else {
+            pocs = '—';
+        }
+
+        // رنگ سطح شدت
+        let sevColor = '#ef4444'; // قرمز برای High/Critical
+        if (test.severity === 'medium') sevColor = '#eab308'; // زرد
+        if (test.severity === 'low') sevColor = '#3b82f6'; // آبی
+
+        const cweId = test.cwe_id || '209'; // پیش فرض 209
+
+        return `
+        <div style="page-break-after: always;">
+            <table style="width:100%; border-collapse:collapse; font-family:Tahoma, Arial, sans-serif; font-size:12px; text-align:right; margin-bottom:20px;" border="1" dir="rtl">
+                <tr>
+                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${L.vulName}<br><br><span style="font-weight:normal;">${escapeHtml(testName)}</span></td>
+                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${L.owaspTitle}<br><br><span style="font-weight:normal;">${escapeHtml(test.wstg_code || test.id)}</span></td>
+                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${L.sensitiveErr}<br><br><span style="font-weight:normal;">&nbsp;</span></td>
+                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${test.categoryId} - ${escapeHtml(catName)}<br><br><span style="font-weight:normal;">&nbsp;</span></td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; font-weight:bold; text-align:center;">${L.severity}<br><br><span style="font-weight:normal;">${t(test.severity)}</span></td>
+                    <td style="padding:8px; font-weight:bold; text-align:center;">${L.cweId}<br><br><span style="font-weight:normal;">${cweId}</span></td>
+                    <td style="padding:8px; background:${sevColor}; color:white; text-align:center; font-weight:bold; font-size:14px;">${t(test.severity)}</td>
+                    <td style="padding:8px; text-align:center; font-size:14px;">${cweId}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.address}</td>
+                    <td colspan="3" style="padding:8px; direction:ltr; text-align:left; font-family:monospace;">${escapeHtml(meta.url || '')}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.description}</td>
+                    <td colspan="3" style="padding:8px; line-height:1.6;">${escapeHtml(desc).replace(/\n/g, '<br>')}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; font-weight:bold; text-align:right; width:25%;">${L.exploitScenario}</td>
+                    <td colspan="3" style="padding:8px; line-height:1.6; min-height:60px; text-align:center;">${notes}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.remediation}</td>
+                    <td colspan="3" style="padding:8px; line-height:1.6;">${escapeHtml(rem).replace(/\n/g, '<br>')}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.objectives}</td>
+                    <td colspan="3" style="padding:8px; line-height:1.6;">${objectives}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.pocs}</td>
+                    <td colspan="3" style="padding:8px; text-align:center;">${pocs}</td>
+                </tr>
+            </table>
+        </div>
+        `;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" dir="rtl">
+    <head><meta charset="UTF-8"><title>WSTG Report</title>
+    <style>
+        @page { size: A4 portrait; margin: 1cm; }
+        body { font-family: Tahoma, Arial, sans-serif; direction: rtl; margin: 0; padding: 0; }
+        table { width: 100%; border-collapse: collapse; }
+        td { border: 1px solid #000; }
+    </style>
+    </head>
+    <body>
+        ${pages}
+    </body>
+    </html>`;
+
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wstg-report-${new Date().toISOString().slice(0,10)}.doc`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(t('wordToast'), 'success');
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   Utilities
+   ═══════════════════════════════════════════════════════════ */
+function escapeHtml(s) {
+    if (s==null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function showToast(msg, type='') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast show '+type;
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Events
+   ═══════════════════════════════════════════════════════════ */
+document.getElementById('setupForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const systemName = document.getElementById('inputSystemName').value.trim();
+    const url = document.getElementById('inputUrl').value.trim();
+    const version = document.getElementById('inputVersion').value.trim();
+    if (!systemName || !url || !version) { showToast(t('fillAll'),'error'); return; }
+    const isEdit = !!meta;
+    meta = { systemName, url, version };
+    saveMeta();
+    if (!isEdit) {
+        flatTests.forEach(t => { t.status='not_started'; t.notes=''; t.poc_images=[]; });
+        saveProgress(); currentIndex = 0;
+    }
+    showAssessment();
+    showToast(isEdit ? t('updated') : t('started'), 'success');
+});
+
+document.getElementById('setupLoadBtn').addEventListener('click', () => document.getElementById('fileLoader').click());
+document.getElementById('saveBtn').addEventListener('click', downloadAssessment);
+document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('fileLoader').click());
+document.getElementById('editMetaBtn').addEventListener('click', () => showSetup());
+document.getElementById('resetBtn').addEventListener('click', () => {
+    if (!confirm(t('resetConfirm'))) return;
+    flatTests.forEach(t => { t.status='not_started'; t.notes=''; t.poc_images=[]; });
+    currentIndex = 0; saveProgress(); render(); showToast(t('resetToast'),'success');
+});
+document.getElementById('fileLoader').addEventListener('change', e => {
+    if (e.target.files[0]) importAssessment(e.target.files[0]);
+    e.target.value = '';
+});
+document.getElementById('prevBtn').addEventListener('click', () => {
+    if (currentIndex > 0) {
+        currentIndex--;
+        if (flatTests.length) expandedCats[flatTests[currentIndex].categoryId] = true;
+        render();
+    }
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+    if (currentIndex < flatTests.length - 1) {
+        currentIndex++;
+        if (flatTests.length) expandedCats[flatTests[currentIndex].categoryId] = true;
+        render();
+    }
+});
+
+// جستجو در منو
+document.getElementById('sidebarSearch').addEventListener('input', renderSidebar);
+
+// خروجی Word
+document.getElementById('exportWordBtn').addEventListener('click', exportWord);
+
+// Lang
+document.getElementById('langSelectSetup').addEventListener('change', e => setLang(e.target.value));
+document.getElementById('langSelectSidebar').addEventListener('change', e => setLang(e.target.value));
+
+// About modal
+function openAbout() { document.getElementById('aboutModal').classList.add('show'); }
+function closeAbout() { document.getElementById('aboutModal').classList.remove('show'); }
+document.getElementById('aboutBtn').addEventListener('click', openAbout);
+document.getElementById('aboutBtnSetup').addEventListener('click', openAbout);
+document.getElementById('aboutClose').addEventListener('click', closeAbout);
+document.getElementById('aboutModal').addEventListener('click', e => { if (e.target.id === 'aboutModal') closeAbout(); });
+
+// Keyboard
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+        if ((e.ctrlKey||e.metaKey) && e.key === 's') { e.preventDefault(); downloadAssessment(); }
+        if ((e.ctrlKey||e.metaKey) && e.key === 'e') { e.preventDefault(); exportWord(); }
+        return;
+    }
+    if ((e.ctrlKey||e.metaKey) && e.key === 's') { e.preventDefault(); downloadAssessment(); return; }
+    if ((e.ctrlKey||e.metaKey) && e.key === 'e') { e.preventDefault(); exportWord(); return; }
+    if (e.key === 'Escape') closeAbout();
+    if (e.key === 'ArrowRight' && currentIndex > 0) { currentIndex--; if (flatTests.length) expandedCats[flatTests[currentIndex].categoryId]=true; render(); }
+    if (e.key === 'ArrowLeft' && currentIndex < flatTests.length-1) { currentIndex++; if (flatTests.length) expandedCats[flatTests[currentIndex].categoryId]=true; render(); }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   Start
+   ═══════════════════════════════════════════════════════════ */
+loadChecklist();
+</script>
+</body>
+</html>

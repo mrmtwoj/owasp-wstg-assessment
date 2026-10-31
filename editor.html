@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWASP TOP 10 Checklist Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue-900:#0a2540;--blue-800:#0d2e54;--blue-700:#0f3b6e;--blue-600:#1657a3;
+  --blue-500:#1e6fd9;--blue-400:#3b8ee8;--blue-100:#e8f1fc;--blue-50:#f4f8fe;
+  --orange-600:#e85d04;--orange-500:#f97316;--orange-400:#fb923c;--orange-100:#ffedd5;
+  --white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;
+  --green-500:#10b981;--red-500:#ef4444;--yellow-500:#eab308;
+  --sh-sm:0 1px 3px rgba(10,37,64,.06);--sh-md:0 4px 12px rgba(10,37,64,.08);
+  --sh-lg:0 12px 32px rgba(10,37,64,.12);--sh-xl:0 24px 64px rgba(10,37,64,.18);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Vazirmatn',Tahoma,sans-serif;background:#f4f8fe;color:var(--gray-800);line-height:1.6;overflow:hidden}
+
+/* ═══ FIXED Toggle Slider (RTL-safe) ═══ */
+.toggle-switch{position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--gray-300);transition:.2s;border-radius:99px}
+.toggle-slider::before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background-color:white;transition:.2s;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,.15)}
+.toggle-switch input:checked+.toggle-slider{background-color:var(--green-500)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(22px)}
+[dir="rtl"] .toggle-slider::before{right:3px;left:auto}
+[dir="rtl"] .toggle-switch input:checked+.toggle-slider::before{transform:translateX(-22px)}
+
+/* Layout */
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{padding:14px 24px;background:linear-gradient(135deg,var(--blue-900),var(--blue-800));color:white;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:var(--sh-md);z-index:10;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px;min-width:0}
+.logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--orange-500),var(--orange-600));border-radius:var(--r-sm);display:grid;place-items:center;font-weight:800;font-size:16px;color:white;box-shadow:0 4px 12px rgba(249,115,22,.4);flex-shrink:0}
+.logo-text{font-size:1rem;font-weight:700}
+.logo-subtitle{font-size:.7rem;color:rgba(255,255,255,.5)}
+.toolbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{padding:10px 18px;border-radius:var(--r-sm);border:none;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,var(--orange-500),var(--orange-600));color:white;box-shadow:0 4px 12px rgba(249,115,22,.35)}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 16px rgba(249,115,22,.45)}
+.btn-ghost{background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.15)}
+.btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.2)}
+.dirty-badge{background:var(--orange-500);color:white;padding:3px 10px;border-radius:99px;font-size:.7rem;font-weight:700}
+.dirty-badge.hidden{display:none}
+
+/* Language selector in topbar */
+.lang-select-top{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:8px 12px;color:white;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;outline:none}
+.lang-select-top option{background:white;color:var(--gray-800)}
+
+/* Main editor layout */
+.editor-main{flex:1;display:grid;grid-template-columns:320px 1fr;overflow:hidden}
+
+/* Sidebar */
+.sidebar{background:white;border-left:1px solid var(--gray-200);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-header{padding:16px 18px;border-bottom:1px solid var(--gray-200)}
+.sidebar-title{font-size:.9rem;font-weight:700;color:var(--blue-900);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.sidebar-title small{font-weight:400;color:var(--gray-400);font-size:.72rem}
+.cat-select{width:100%;padding:11px 14px;border:2px solid var(--gray-200);border-radius:var(--r-sm);font-family:inherit;font-size:.88rem;font-weight:600;background:var(--blue-50);color:var(--blue-800);cursor:pointer;transition:all .2s}
+.cat-select:focus{outline:none;border-color:var(--blue-500);background:white;box-shadow:0 0 0 3px rgba(30,111,217,.1)}
+
+.test-list-header{padding:12px 18px;font-size:.78rem;font-weight:600;color:var(--gray-600);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-100)}
+.test-list-header .count{background:var(--blue-100);color:var(--blue-600);padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700}
+.test-list{flex:1;overflow-y:auto;padding:8px 10px}
+.test-list::-webkit-scrollbar{width:6px}
+.test-list::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px}
+.test-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r-sm);cursor:pointer;font-size:.82rem;color:var(--gray-600);transition:all .15s;margin-bottom:3px;border-right:3px solid transparent}
+.test-item:hover{background:var(--blue-50)}
+.test-item.active{background:var(--blue-100);color:var(--blue-800);border-right-color:var(--blue-500);font-weight:600}
+.test-item.disabled{opacity:.55}
+.test-item.disabled .test-name{text-decoration:line-through}
+.test-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.test-id{font-family:'Courier New',monospace;font-size:.68rem;color:var(--gray-400);flex-shrink:0}
+
+.add-test-btn{margin:10px 14px 14px;padding:11px;border:2px dashed var(--gray-300);background:transparent;border-radius:var(--r-sm);font-family:inherit;font-size:.82rem;font-weight:600;color:var(--gray-600);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-test-btn:hover{border-color:var(--blue-400);color:var(--blue-600);background:var(--blue-50)}
+
+.sidebar-footer{padding:10px 18px;border-top:1px solid var(--gray-200);font-size:.72rem;color:var(--gray-400);text-align:center;background:var(--gray-50)}
+
+/* Editor panel */
+.editor-panel{overflow-y:auto;background:white;padding:32px 40px}
+.editor-panel::-webkit-scrollbar{width:10px}
+.editor-panel::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px;border:2px solid white}
+
+.welcome-state{text-align:center;padding:80px 20px;color:var(--gray-400);max-width:500px;margin:auto}
+.welcome-state .icon{font-size:3rem;margin-bottom:16px}
+.welcome-state h2{font-size:1.3rem;color:var(--blue-900);margin-bottom:8px}
+.welcome-state p{font-size:.9rem;line-height:1.8}
+
+.editor-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--gray-200);flex-wrap:wrap}
+.editor-header-info{flex:1;min-width:200px}
+.editor-header-info .badge{display:inline-block;padding:4px 10px;border-radius:99px;font-size:.7rem;font-weight:700;background:var(--blue-100);color:var(--blue-600);margin-bottom:6px;font-family:'Courier New',monospace}
+.editor-header-info h1{font-size:1.2rem;color:var(--blue-900);font-weight:800}
+.editor-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-sm{padding:8px 14px;border-radius:var(--r-sm);border:1px solid var(--gray-200);background:white;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--gray-600);display:flex;align-items:center;gap:5px;transition:all .2s}
+.btn-sm:hover{background:var(--gray-50);border-color:var(--gray-300)}
+.btn-sm.danger{color:var(--red-500)}
+.btn-sm.danger:hover{background:#fef2f2;border-color:#fca5a5}
+
+/* Form */
+.form-section{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-md);padding:18px;margin-bottom:18px}
+.form-section-title{font-size:.85rem;font-weight:700;color:var(--blue-800);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.form-section-title::before{content:'';width:4px;height:16px;background:linear-gradient(180deg,var(--orange-500),var(--orange-600));border-radius:99px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid.full{grid-template-columns:1fr}
+.form-group{margin-bottom:0}
+.form-group.full{grid-column:1/-1}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--gray-600);margin-bottom:6px}
+.form-group label small{font-weight:400;color:var(--gray-400)}
+.form-input,.form-textarea{width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--r-sm);font-family:inherit;font-size:.88rem;transition:all .2s;background:white;color:var(--gray-800)}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(30,111,217,.1)}
+.form-input[dir="ltr"]{direction:ltr;text-align:left}
+.form-textarea{min-height:80px;resize:vertical;line-height:1.7}
+.form-textarea.tall{min-height:120px}
+
+/* Severity pills */
+.severity-pills{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sev-pill{position:relative;cursor:pointer}
+.sev-pill input{position:absolute;opacity:0}
+.sev-pill-content{padding:10px 6px;text-align:center;border-radius:var(--r-sm);border:2px solid var(--gray-200);background:white;font-size:.75rem;font-weight:600;color:var(--gray-600);transition:all .15s}
+.sev-pill-content:hover{border-color:var(--gray-300)}
+.sev-pill input[value="critical"]:checked+.sev-pill-content{border-color:#7f1d1d;background:#fef2f2;color:#7f1d1d;font-weight:800}
+.sev-pill input[value="high"]:checked+.sev-pill-content{border-color:var(--orange-500);background:#fff7ed;color:var(--orange-600);font-weight:800}
+.sev-pill input[value="medium"]:checked+.sev-pill-content{border-color:var(--yellow-500);background:#fefce8;color:#854d0e;font-weight:800}
+.sev-pill input[value="low"]:checked+.sev-pill-content{border-color:var(--blue-400);background:var(--blue-50);color:var(--blue-600);font-weight:800}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--blue-50);border:1px solid var(--blue-100);padding:12px 16px;border-radius:var(--r-sm)}
+.toggle-row-info{font-size:.82rem;color:var(--blue-900)}
+.toggle-row-info strong{display:block;margin-bottom:2px;font-size:.85rem}
+.toggle-row-info small{color:var(--gray-600);font-weight:400;font-size:.75rem}
+
+/* Language tabs */
+.lang-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--gray-200);margin-bottom:16px}
+.lang-tab{padding:9px 14px;border:none;background:transparent;font-family:inherit;font-size:.8rem;font-weight:600;color:var(--gray-600);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:5px}
+.lang-tab:hover{background:var(--gray-50);color:var(--blue-700)}
+.lang-tab.active{color:var(--blue-600);border-bottom-color:var(--orange-500);background:var(--blue-50)}
+.lang-tab .has-content{width:6px;height:6px;background:var(--green-500);border-radius:50%;display:inline-block}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--blue-900);color:white;padding:12px 24px;border-radius:var(--r-md);font-size:.85rem;box-shadow:var(--sh-xl);opacity:0;transition:all .3s;z-index:999;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{background:var(--green-500)}
+.toast.error{background:var(--red-500)}
+
+@media (max-width:900px){
+  .editor-main{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .editor-panel{padding:20px}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">✎</div>
+      <div>
+        <div class="logo-text" id="appTitle">OWASP TOP 10 Editor</div>
+        <div class="logo-subtitle" id="appSubtitle">Checklist Management · 2025</div>
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <select class="lang-select-top" id="uiLang" title="UI Language">
+        <option value="fa">🇮🇷 فارسی</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="la">🏛️ Latina</option>
+        <option value="hi">🇮🇳 हिन्दी</option>
+        <option value="ar">🇸🇦 العربية</option>
+      </select>
+      <span class="dirty-badge hidden" id="dirtyBadge">● Unsaved</span>
+      <button class="btn btn-ghost" id="loadBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span data-i18n="load">Load</span>
+      </button>
+      <button class="btn btn-primary" id="saveBtn" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span data-i18n="save">Save checklist.json</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="editor-main">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <span data-i18n="category">Category</span>
+          <small id="sidebarInfo">—</small>
+        </div>
+        <select class="cat-select" id="categorySelect"></select>
+      </div>
+      <div class="test-list-header">
+        <span data-i18n="tests">Tests</span>
+        <span class="count" id="testCount">0</span>
+      </div>
+      <div class="test-list" id="testList"></div>
+      <button class="add-test-btn" id="addTestBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span data-i18n="addTest">Add Test</span>
+      </button>
+      <div class="sidebar-footer" id="sidebarFooter">MR.MTwoJ · acyber.ir</div>
+    </aside>
+
+    <main class="editor-panel" id="editorPanel"></main>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   i18n
+   ═══════════════════════════════════════════════════════════ */
+const LANGS = ['fa','en','zh','ru','la','hi','ar'];
+const RTL_LANGS = ['fa','ar'];
+const LANG_NAMES = { fa:'فارسی', en:'English', zh:'中文', ru:'Русский', la:'Latina', hi:'हिन्दी', ar:'العربية' };
+const LANG_FLAGS = { fa:'🇮🇷', en:'🇬🇧', zh:'🇨🇳', ru:'🇷🇺', la:'🏛️', hi:'🇮🇳', ar:'🇸🇦' };
+
+const I18N = {
+  fa: {
+    appTitle:'ویرایشگر OWASP TOP 10', appSubtitle:'مدیریت چک‌لیست · ۲۰۲۵',
+    load:'بارگذاری', save:'دانلود checklist.json', category:'دسته‌بندی', tests:'تست‌ها',
+    addTest:'افزودن تست', general:'اطلاعات کلی', content:'محتوای تست', id:'شناسه',
+    wstgCode:'کد WSTG', severity:'سطح شدت', enabled:'فعال در ارزیابی',
+    enabledDesc:'اگر غیرفعال باشد، این تست در ارزیابی نمایش داده نمی‌شود',
+    name:'نام تست', description:'شرح آسیب‌پذیری', remediation:'روش رفع',
+    objectives:'اهداف آزمون (هر هدف یک خط)', payloads:'پیلود / روش ارزیابی (هر مورد یک خط)',
+    welcome:'برای شروع، یک دسته‌بندی از منوی کنار انتخاب کنید و یک تست را باز کنید.',
+    noTests:'هیچ تستی در این دسته وجود ندارد. روی «افزودن تست» بزنید.',
+    delete:'حذف', editLang:'ویرایش زبان', critical:'بحرانی', high:'خطرناک', medium:'متوسط', low:'کم',
+    savedToast:'✓ فایل checklist.json دانلود شد', loadedToast:'✓ فایل با موفقیت بارگذاری شد',
+    addedToast:'✓ تست جدید اضافه شد', deletedToast:'✓ تست حذف شد',
+    confirmDelete:'آیا از حذف این تست مطمئن هستید؟', invalidJson:'خطا: ساختار JSON نامعتبر است',
+    emptyName:'نام تست نمی‌تواند خالی باشد', dupId:'شناسه تکراری است',
+    emptyContent:'(خالی)', testAdded:'تست', noFile:'فایلی انتخاب نشد'
+  },
+  en: {
+    appTitle:'OWASP TOP 10 Editor', appSubtitle:'Checklist Management · 2025',
+    load:'Load', save:'Download checklist.json', category:'Category', tests:'Tests',
+    addTest:'Add Test', general:'General Information', content:'Test Content', id:'ID',
+    wstgCode:'WSTG Code', severity:'Severity Level', enabled:'Enabled in Assessment',
+    enabledDesc:'If disabled, this test will not be shown in the assessment',
+    name:'Test Name', description:'Vulnerability Description', remediation:'Remediation',
+    objectives:'Test Objectives (one per line)', payloads:'Payload / Assessment Method (one per line)',
+    welcome:'Select a category from the sidebar and open a test to begin editing.',
+    noTests:'No tests in this category. Click "Add Test" to create one.',
+    delete:'Delete', editLang:'Edit Language', critical:'Critical', high:'High', medium:'Medium', low:'Low',
+    savedToast:'✓ checklist.json downloaded', loadedToast:'✓ File loaded successfully',
+    addedToast:'✓ New test added', deletedToast:'✓ Test deleted',
+    confirmDelete:'Are you sure you want to delete this test?', invalidJson:'Error: Invalid JSON structure',
+    emptyName:'Test name cannot be empty', dupId:'Duplicate ID',
+    emptyContent:'(empty)', testAdded:'Test', noFile:'No file selected'
+  },
+  zh: {
+    appTitle:'OWASP TOP 10 编辑器', appSubtitle:'检查清单管理 · 2025',
+    load:'加载', save:'下载 checklist.json', category:'类别', tests:'测试',
+    addTest:'添加测试', general:'基本信息', content:'测试内容', id:'ID',
+    wstgCode:'WSTG 代码', severity:'严重程度', enabled:'在评估中启用',
+    enabledDesc:'如果禁用，此测试将不会在评估中显示',
+    name:'测试名称', description:'漏洞描述', remediation:'修复方法',
+    objectives:'测试目标（每行一个）', payloads:'负载/评估方法（每行一个）',
+    welcome:'从侧边栏选择一个类别并打开测试以开始编辑。',
+    noTests:'此类别中没有测试。点击"添加测试"创建一个。',
+    delete:'删除', editLang:'编辑语言', critical:'严重', high:'高危', medium:'中危', low:'低危',
+    savedToast:'✓ checklist.json 已下载', loadedToast:'✓ 文件加载成功',
+    addedToast:'✓ 新测试已添加', deletedToast:'✓ 测试已删除',
+    confirmDelete:'确定删除此测试吗？', invalidJson:'错误：JSON 结构无效',
+    emptyName:'测试名称不能为空', dupId:'重复的 ID',
+    emptyContent:'（空）', testAdded:'测试', noFile:'未选择文件'
+  },
+  ru: {
+    appTitle:'Редактор OWASP TOP 10', appSubtitle:'Управление чек-листом · 2025',
+    load:'Загрузить', save:'Скачать checklist.json', category:'Категория', tests:'Тесты',
+    addTest:'Добавить тест', general:'Общая информация', content:'Содержание теста', id:'ID',
+    wstgCode:'Код WSTG', severity:'Уровень серьёзности', enabled:'Включён в оценке',
+    enabledDesc:'Если отключено, этот тест не будет показан в оценке',
+    name:'Название теста', description:'Описание уязвимости', remediation:'Метод исправления',
+    objectives:'Цели теста (по одной в строке)', payloads:'Полезная нагрузка / Метод (по одной в строке)',
+    welcome:'Выберите категорию на боковой панели и откройте тест для редактирования.',
+    noTests:'В этой категории нет тестов. Нажмите "Добавить тест".',
+    delete:'Удалить', editLang:'Редактировать язык', critical:'Критический', high:'Высокий', medium:'Средний', low:'Низкий',
+    savedToast:'✓ checklist.json скачан', loadedToast:'✓ Файл успешно загружен',
+    addedToast:'✓ Новый тест добавлен', deletedToast:'✓ Тест удалён',
+    confirmDelete:'Вы уверены, что хотите удалить этот тест?', invalidJson:'Ошибка: неверная структура JSON',
+    emptyName:'Имя теста не может быть пустым', dupId:'Дублирующийся ID',
+    emptyContent:'(пусто)', testAdded:'Тест', noFile:'Файл не выбран'
+  },
+  la: {
+    appTitle:'Editor OWASP TOP 10', appSubtitle:'Administratio Indicis · 2025',
+    load:'Onerare', save:'Servare checklist.json', category:'Categoria', tests:'Examinationes',
+    addTest:'Addere Examen', general:'Informatio Generalis', content:'Contentum Examinationis', id:'ID',
+    wstgCode:'Codex WSTG', severity:'Gradus Severitatis', enabled:'Activum in Aestimatione',
+    enabledDesc:'Si inactivum, hoc examen in aestimatione non ostendetur',
+    name:'Nomen Examinationis', description:'Descriptio Vulnerabilitatis', remediation:'Methodus Correctionis',
+    objectives:'Scopos Examinationis (unus per lineam)', payloads:'Onus / Methodus (unus per lineam)',
+    welcome:'Elige categoriam e latere et aperi examen ut edas.',
+    noTests:'Nulla examina in hac categoria. Preme "Addere Examen".',
+    delete:'Delere', editLang:'Editare Linguam', critical:'Criticus', high:'Altus', medium:'Medius', low:'Humilis',
+    savedToast:'✓ checklist.json servatus', loadedToast:'✓ Fasciculus oneratus',
+    addedToast:'✓ Novum examen additum', deletedToast:'✓ Examen deletum',
+    confirmDelete:'Certusne es te hoc examen delere velle?', invalidJson:'Error: structura JSON invalida',
+    emptyName:'Nomen examinationis non potest esse vacuum', dupId:'ID duplicatum',
+    emptyContent:'(vacuum)', testAdded:'Examen', noFile:'Nullus fasciculus selectus'
+  },
+  hi: {
+    appTitle:'OWASP TOP 10 संपादक', appSubtitle:'चेकलिस्ट प्रबंधन · 2025',
+    load:'लोड करें', save:'checklist.json डाउनलोड करें', category:'श्रेणी', tests:'परीक्षण',
+    addTest:'परीक्षण जोड़ें', general:'सामान्य जानकारी', content:'परीक्षण सामग्री', id:'ID',
+    wstgCode:'WSTG कोड', severity:'गंभीरता स्तर', enabled:'मूल्यांकन में सक्षम',
+    enabledDesc:'यदि अक्षम है, तो यह परीक्षण मूल्यांकन में नहीं दिखेगा',
+    name:'परीक्षण नाम', description:'भेद्यता विवरण', remediation:'उपचार विधि',
+    objectives:'परीक्षण उद्देश्य (प्रति पंक्ति एक)', payloads:'पेलोड / मूल्यांकन विधि (प्रति पंक्ति एक)',
+    welcome:'साइडबार से एक श्रेणी चुनें और संपादन शुरू करने के लिए एक परीक्षण खोलें।',
+    noTests:'इस श्रेणी में कोई परीक्षण नहीं है। "परीक्षण जोड़ें" पर क्लिक करें।',
+    delete:'हटाएं', editLang:'भाषा संपादित करें', critical:'गंभीर', high:'उच्च', medium:'मध्यम', low:'निम्न',
+    savedToast:'✓ checklist.json डाउनलोड हुआ', loadedToast:'✓ फ़ाइल सफलतापूर्वक लोड हुई',
+    addedToast:'✓ नया परीक्षण जोड़ा गया', deletedToast:'✓ परीक्षण हटाया गया',
+    confirmDelete:'क्या आप वाकई इस परीक्षण को हटाना चाहते हैं?', invalidJson:'त्रुटि: अमान्य JSON संरचना',
+    emptyName:'परीक्षण नाम खाली नहीं हो सकता', dupId:'डुप्लिकेट ID',
+    emptyContent:'(खाली)', testAdded:'परीक्षण', noFile:'कोई फ़ाइल नहीं चुनी गई'
+  },
+  ar: {
+    appTitle:'محرر OWASP TOP 10', appSubtitle:'إدارة قائمة التحقق · 2025',
+    load:'تحميل', save:'تنزيل checklist.json', category:'الفئة', tests:'الاختبارات',
+    addTest:'إضافة اختبار', general:'معلومات عامة', content:'محتوى الاختبار', id:'المعرف',
+    wstgCode:'رمز WSTG', severity:'مستوى الخطورة', enabled:'مُفعّل في التقييم',
+    enabledDesc:'إذا كان معطلاً، لن يظهر هذا الاختبار في التقييم',
+    name:'اسم الاختبار', description:'وصف الثغرة', remediation:'طريقة الإصلاح',
+    objectives:'أهداف الاختبار (هدف واحد لكل سطر)', payloads:'الحمولة / طريقة التقييم (واحد لكل سطر)',
+    welcome:'اختر فئة من الشريط الجانبي وافتح اختباراً لبدء التحرير.',
+    noTests:'لا توجد اختبارات في هذه الفئة. انقر "إضافة اختبار".',
+    delete:'حذف', editLang:'تعديل اللغة', critical:'حرج', high:'عالي', medium:'متوسط', low:'منخفض',
+    savedToast:'✓ تم تنزيل checklist.json', loadedToast:'✓ تم تحميل الملف بنجاح',
+    addedToast:'✓ تمت إضافة اختبار جديد', deletedToast:'✓ تم حذف الاختبار',
+    confirmDelete:'هل أنت متأكد من حذف هذا الاختبار؟', invalidJson:'خطأ: بنية JSON غير صالحة',
+    emptyName:'لا يمكن أن يكون اسم الاختبار فارغاً', dupId:'معرف مكرر',
+    emptyContent:'(فارغ)', testAdded:'اختبار', noFile:'لم يتم اختيار ملف'
+  }
+};
+
+let currentLang = localStorage.getItem('wstg_editor_lang') || 'fa';
+function t(k){ return (I18N[currentLang] && I18N[currentLang][k]) || I18N.en[k] || k; }
+
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.getElementById('appTitle').textContent = t('appTitle');
+  document.getElementById('appSubtitle').textContent = t('appSubtitle');
+  document.documentElement.dir = RTL_LANGS.includes(currentLang) ? 'rtl' : 'ltr';
+  document.documentElement.lang = currentLang;
+  document.getElementById('uiLang').value = currentLang;
+  renderCategorySelect();
+  renderTestList();
+  if(selectedTestId) renderEditorPanel();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   State
+   ═══════════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'wstg_top10_checklist_v1';
+const CATEGORY_NAMES_EN = {
+  A01:'Broken Access Control', A02:'Security Misconfiguration',
+  A03:'Software Supply Chain Failures', A04:'Cryptographic Failures',
+  A05:'Injection', A06:'Insecure Design', A07:'Authentication Failures',
+  A08:'Software or Data Integrity Failures',
+  A09:'Security Logging and Alerting Failures',
+  A10:'Mishandling of Exceptional Conditions'
+};
+
+let data = { version:'2.0', categories:{} };
+let selectedCat = 'A01';
+let selectedTestId = null;
+let editLang = 'fa';
+let dirty = false;
+
+/* ═══════════════════════════════════════════════════════════
+   Init
+   ═══════════════════════════════════════════════════════════ */
+function init(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(saved){
+    try{ data = JSON.parse(saved); normalizeData(); }
+    catch(e){ data = defaultStructure(); }
+  } else {
+    data = defaultStructure();
+  }
+  applyI18n();
+  renderEditorPanel();
+}
+
+function defaultStructure(){
+  const out = { version:'2.0', categories:{} };
+  Object.keys(CATEGORY_NAMES_EN).forEach(cat => {
+    out.categories[cat] = {
+      id: cat,
+      name_en: CATEGORY_NAMES_EN[cat],
+      name_fa: CATEGORY_NAMES_EN[cat],
+      name_zh: CATEGORY_NAMES_EN[cat],
+      name_ru: CATEGORY_NAMES_EN[cat],
+      name_la: CATEGORY_NAMES_EN[cat],
+      name_hi: CATEGORY_NAMES_EN[cat],
+      name_ar: CATEGORY_NAMES_EN[cat],
+      tests: []
+    };
+  });
+  return out;
+}
+
+function normalizeData(){
+  if(!data.categories) data.categories = {};
+  Object.keys(CATEGORY_NAMES_EN).forEach(cat => {
+    if(!data.categories[cat]){
+      data.categories[cat] = {
+        id: cat, name_en: CATEGORY_NAMES_EN[cat],
+        name_fa: CATEGORY_NAMES_EN[cat], name_zh: CATEGORY_NAMES_EN[cat],
+        name_ru: CATEGORY_NAMES_EN[cat], name_la: CATEGORY_NAMES_EN[cat],
+        name_hi: CATEGORY_NAMES_EN[cat], name_ar: CATEGORY_NAMES_EN[cat],
+        tests: []
+      };
+    } else {
+      if(!Array.isArray(data.categories[cat].tests)) data.categories[cat].tests = [];
+      data.categories[cat].tests.forEach(test => {
+        if(test.enabled === undefined) test.enabled = true;
+        LANGS.forEach(l => {
+          const nameKey = 'name_' + l;
+          if(!test[nameKey]) test[nameKey] = test.name_en || test.name_fa || '';
+          const dk = 'description_' + l;
+          if(!test[dk]) test[dk] = test.description_en || test.description_fa || '';
+          const rk = 'remediation_' + l;
+          if(!test[rk]) test[rk] = test.remediation_en || test.remediation_fa || '';
+          const ok = 'objectives_' + l;
+          if(!Array.isArray(test[ok])) test[ok] = test.objectives_en || test.objectives_fa || [];
+          const pk = 'payloads_' + l;
+          if(!Array.isArray(test[pk])) test[pk] = test.payloads_en || test.payloads_fa || [];
+        });
+      });
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Sidebar
+   ═══════════════════════════════════════════════════════════ */
+function renderCategorySelect(){
+  const sel = document.getElementById('categorySelect');
+  sel.innerHTML = '';
+  Object.keys(CATEGORY_NAMES_EN).forEach(catId => {
+    const cat = data.categories[catId];
+    const name = (cat && cat['name_'+currentLang]) || CATEGORY_NAMES_EN[catId];
+    const testCount = cat && cat.tests ? cat.tests.filter(t => t.enabled !== false).length : 0;
+    const totalCount = cat && cat.tests ? cat.tests.length : 0;
+    const opt = document.createElement('option');
+    opt.value = catId;
+    opt.textContent = `${catId} · ${name} (${testCount}/${totalCount})`;
+    if(catId === selectedCat) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function renderTestList(){
+  const list = document.getElementById('testList');
+  list.innerHTML = '';
+  const cat = data.categories[selectedCat];
+  if(!cat || !cat.tests || cat.tests.length === 0){
+    list.innerHTML = `<div style="padding:30px 16px;text-align:center;color:var(--gray-400);font-size:.82rem;">${t('noTests')}</div>`;
+    document.getElementById('testCount').textContent = '0';
+    document.getElementById('sidebarInfo').textContent = selectedCat;
+    return;
+  }
+  cat.tests.forEach(test => {
+    const isActive = test.id === selectedTestId;
+    const isDisabled = test.enabled === false;
+    const el = document.createElement('div');
+    el.className = 'test-item' + (isActive ? ' active' : '') + (isDisabled ? ' disabled' : '');
+    const testName = test['name_'+currentLang] || test.name_en || test.name_fa || '(unnamed)';
+    el.innerHTML = `
+      <span class="test-name">${escapeHtml(testName)}</span>
+      <span class="test-id">${escapeHtml(test.id)}</span>
+    `;
+    el.addEventListener('click', () => {
+      selectedTestId = test.id;
+      renderTestList();
+      renderEditorPanel();
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('testCount').textContent = cat.tests.length;
+  const enabledCount = cat.tests.filter(t => t.enabled !== false).length;
+  document.getElementById('sidebarInfo').textContent = `${enabledCount}/${cat.tests.length}`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Editor panel
+   ═══════════════════════════════════════════════════════════ */
+function renderEditorPanel(){
+  const panel = document.getElementById('editorPanel');
+  const cat = data.categories[selectedCat];
+  if(!cat){
+    panel.innerHTML = `<div class="welcome-state"><div class="icon">📋</div><h2>${t('welcome')}</h2></div>`;
+    return;
+  }
+  if(!selectedTestId){
+    panel.innerHTML = `<div class="welcome-state"><div class="icon">📋</div><h2>${t('welcome')}</h2><p>${t('noTests')}</p></div>`;
+    return;
+  }
+  const test = cat.tests.find(t => t.id === selectedTestId);
+  if(!test){
+    panel.innerHTML = `<div class="welcome-state"><div class="icon">📋</div><h2>${t('welcome')}</h2></div>`;
+    return;
+  }
+  renderTestForm(test);
+}
+
+function renderTestForm(test){
+  const panel = document.getElementById('editorPanel');
+  const sev = test.severity || 'medium';
+  const isDisabled = test.enabled === false;
+
+  panel.innerHTML = `
+    <div class="editor-header">
+      <div class="editor-header-info">
+        <span class="badge">${escapeHtml(test.id)}</span>
+        <h1>${t('content')}</h1>
+      </div>
+      <div class="editor-actions">
+        <button class="btn-sm danger" id="deleteTestBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+          ${t('delete')}
+        </button>
+      </div>
+    </div>
+
+    <!-- General -->
+    <div class="form-section">
+      <div class="form-section-title">${t('general')}</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>${t('id')}</label>
+          <input type="text" class="form-input" id="fId" value="${escapeAttr(test.id)}" dir="ltr">
+        </div>
+        <div class="form-group">
+          <label>${t('wstgCode')}</label>
+          <input type="text" class="form-input" id="fWstg" value="${escapeAttr(test.wstg_code || test.id)}" dir="ltr">
+        </div>
+        <div class="form-group full">
+          <label>${t('severity')}</label>
+          <div class="severity-pills">
+            ${['critical','high','medium','low'].map(s => `
+              <label class="sev-pill">
+                <input type="radio" name="sev" value="${s}" ${sev === s ? 'checked' : ''}>
+                <div class="sev-pill-content">${t(s)}</div>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        <div class="form-group full">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <strong>${t('enabled')}</strong>
+              <small>${t('enabledDesc')}</small>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="fEnabled" ${!isDisabled ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Language tabs -->
+    <div class="form-section">
+      <div class="form-section-title">${t('content')}</div>
+      <div class="lang-tabs" id="langTabs">
+        ${LANGS.map(l => {
+          const hasName = (test['name_'+l] || '').trim().length > 0;
+          return `<button type="button" class="lang-tab ${l === editLang ? 'active' : ''}" data-lang="${l}">
+            ${LANG_FLAGS[l]} ${LANG_NAMES[l]}
+            ${hasName ? '<span class="has-content"></span>' : ''}
+          </button>`;
+        }).join('')}
+      </div>
+
+      <div class="form-grid full">
+        <div class="form-group full">
+          <label>${t('name')} <small>(${LANG_NAMES[editLang]})</small></label>
+          <input type="text" class="form-input" id="fName" value="${escapeAttr(test['name_'+editLang] || '')}">
+        </div>
+        <div class="form-group full">
+          <label>${t('description')}</label>
+          <textarea class="form-textarea" id="fDescription" placeholder="${t('emptyContent')}">${escapeHtml(test['description_'+editLang] || '')}</textarea>
+        </div>
+        <div class="form-group full">
+          <label>${t('remediation')}</label>
+          <textarea class="form-textarea" id="fRemediation" placeholder="${t('emptyContent')}">${escapeHtml(test['remediation_'+editLang] || '')}</textarea>
+        </div>
+        <div class="form-group full">
+          <label>${t('objectives')}</label>
+          <textarea class="form-textarea" id="fObjectives" placeholder="${t('emptyContent')}">${escapeHtml((test['objectives_'+editLang] || []).join('\n'))}</textarea>
+        </div>
+        <div class="form-group full">
+          <label>${t('payloads')}</label>
+          <textarea class="form-textarea tall" id="fPayloads" placeholder="${t('emptyContent')}">${escapeHtml((test['payloads_'+editLang] || []).join('\n'))}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+
+  bindFormEvents(test);
+}
+
+function bindFormEvents(test){
+  const cat = data.categories[selectedCat];
+
+  document.getElementById('fId').addEventListener('input', e => {
+    const newId = e.target.value.trim();
+    if(!newId) return;
+    if(cat.tests.some(x => x.id === newId && x !== test)){
+      e.target.style.borderColor = 'var(--red-500)';
+      return;
+    }
+    e.target.style.borderColor = '';
+    test.id = newId;
+    selectedTestId = newId;
+    markDirty();
+    renderTestList();
+  });
+  document.getElementById('fWstg').addEventListener('input', e => { test.wstg_code = e.target.value; markDirty(); });
+  document.querySelectorAll('input[name="sev"]').forEach(r => {
+    r.addEventListener('change', e => { test.severity = e.target.value; markDirty(); });
+  });
+  document.getElementById('fEnabled').addEventListener('change', e => {
+    test.enabled = e.target.checked;
+    markDirty();
+    renderTestList();
+  });
+  document.getElementById('fName').addEventListener('input', e => {
+    test['name_'+editLang] = e.target.value;
+    markDirty();
+    renderTestList();
+    // update tab dot
+    const tab = document.querySelector(`.lang-tab[data-lang="${editLang}"]`);
+    if(tab){
+      const dot = tab.querySelector('.has-content');
+      if(e.target.value.trim() && !dot){
+        const span = document.createElement('span');
+        span.className = 'has-content';
+        tab.appendChild(span);
+      } else if(!e.target.value.trim() && dot){
+        dot.remove();
+      }
+    }
+  });
+  document.getElementById('fDescription').addEventListener('input', e => { test['description_'+editLang] = e.target.value; markDirty(); });
+  document.getElementById('fRemediation').addEventListener('input', e => { test['remediation_'+editLang] = e.target.value; markDirty(); });
+  document.getElementById('fObjectives').addEventListener('input', e => {
+    test['objectives_'+editLang] = e.target.value.split('\n').map(x => x.trim()).filter(Boolean);
+    markDirty();
+  });
+  document.getElementById('fPayloads').addEventListener('input', e => {
+    test['payloads_'+editLang] = e.target.value.split('\n').map(x => x.trim()).filter(Boolean);
+    markDirty();
+  });
+
+  document.querySelectorAll('.lang-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      editLang = tab.dataset.lang;
+      renderEditorPanel();
+    });
+  });
+
+  document.getElementById('deleteTestBtn').addEventListener('click', () => {
+    if(!confirm(t('confirmDelete'))) return;
+    cat.tests = cat.tests.filter(x => x.id !== test.id);
+    selectedTestId = null;
+    markDirty();
+    renderTestList();
+    renderEditorPanel();
+    showToast(t('deletedToast'), 'success');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Actions
+   ═══════════════════════════════════════════════════════════ */
+function addTest(){
+  const cat = data.categories[selectedCat];
+  if(!cat) return;
+  const newId = generateId(selectedCat, cat);
+  const newTest = {
+    id: newId,
+    wstg_code: newId,
+    severity: 'medium',
+    enabled: true
+  };
+  LANGS.forEach(l => {
+    newTest['name_'+l] = '';
+    newTest['description_'+l] = '';
+    newTest['remediation_'+l] = '';
+    newTest['objectives_'+l] = [];
+    newTest['payloads_'+l] = [];
+  });
+  newTest['name_'+editLang] = 'New Test';
+  cat.tests.push(newTest);
+  selectedTestId = newId;
+  markDirty();
+  renderTestList();
+  renderEditorPanel();
+  showToast(t('addedToast'), 'success');
+  setTimeout(() => {
+    const inp = document.getElementById('fName');
+    if(inp){ inp.focus(); inp.select(); }
+  }, 100);
+}
+
+function generateId(catId, cat){
+  const base = catId.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  let n = 1;
+  const existing = new Set((cat.tests || []).map(t => t.id));
+  while(existing.has(`${base}-${String(n).padStart(2, '0')}`)) n++;
+  return `${base}-${String(n).padStart(2, '0')}`;
+}
+
+function markDirty(){
+  dirty = true;
+  document.getElementById('dirtyBadge').classList.remove('hidden');
+  saveToLocal();
+  updateSaveBtn();
+}
+
+function saveToLocal(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+function updateSaveBtn(){
+  document.getElementById('saveBtn').disabled = false;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Load / Save
+   ═══════════════════════════════════════════════════════════ */
+function loadFromFile(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed.categories) throw new Error(t('invalidJson'));
+      data = parsed;
+      normalizeData();
+      selectedCat = 'A01';
+      selectedTestId = null;
+      dirty = false;
+      document.getElementById('dirtyBadge').classList.add('hidden');
+      saveToLocal();
+      renderCategorySelect();
+      renderTestList();
+      renderEditorPanel();
+      updateSaveBtn();
+      showToast(t('loadedToast'), 'success');
+    }catch(err){
+      showToast('✕ ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function downloadChecklist(){
+  const out = { version: data.version || '2.0', categories: {} };
+  Object.keys(CATEGORY_NAMES_EN).forEach(catId => {
+    const cat = data.categories[catId];
+    if(!cat) return;
+    out.categories[catId] = { id: cat.id || catId };
+    LANGS.forEach(l => {
+      out.categories[catId]['name_'+l] = cat['name_'+l] || CATEGORY_NAMES_EN[catId];
+    });
+    out.categories[catId].tests = (cat.tests || []).map(test => {
+      const tOut = {
+        id: test.id,
+        wstg_code: test.wstg_code || test.id,
+        severity: test.severity || 'medium',
+        enabled: test.enabled !== false
+      };
+      LANGS.forEach(l => {
+        tOut['name_'+l] = test['name_'+l] || '';
+        tOut['description_'+l] = test['description_'+l] || '';
+        tOut['remediation_'+l] = test['remediation_'+l] || '';
+        tOut['objectives_'+l] = Array.isArray(test['objectives_'+l]) ? test['objectives_'+l] : [];
+        tOut['payloads_'+l] = Array.isArray(test['payloads_'+l]) ? test['payloads_'+l] : [];
+      });
+      return tOut;
+    });
+  });
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'checklist.json'; a.click();
+  URL.revokeObjectURL(url);
+  dirty = false;
+  document.getElementById('dirtyBadge').classList.add('hidden');
+  showToast(t('savedToast'), 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Utils
+   ═══════════════════════════════════════════════════════════ */
+function escapeHtml(s){
+  if(s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
+
+function showToast(msg, type = ''){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show ' + type;
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Events
+   ═══════════════════════════════════════════════════════════ */
+document.getElementById('uiLang').addEventListener('change', e => {
+  currentLang = e.target.value;
+  localStorage.setItem('wstg_editor_lang', currentLang);
+  applyI18n();
+  if(selectedTestId) renderEditorPanel();
+});
+document.getElementById('categorySelect').addEventListener('change', e => {
+  selectedCat = e.target.value;
+  selectedTestId = null;
+  renderTestList();
+  renderEditorPanel();
+});
+document.getElementById('addTestBtn').addEventListener('click', addTest);
+document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', e => {
+  if(e.target.files[0]) loadFromFile(e.target.files[0]);
+  e.target.value = '';
+});
+document.getElementById('saveBtn').addEventListener('click', downloadChecklist);
+document.getElementById('saveBtn').disabled = true;
+
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey || e.metaKey) && e.key === 's'){
+    e.preventDefault();
+    downloadChecklist();
+  }
+});
+window.addEventListener('beforeunload', e => {
+  if(dirty){ e.preventDefault(); e.returnValue = ''; }
+});
+
+init();
+</script>
+</body>
+</html>
