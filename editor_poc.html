@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ویرایشگر حرفه‌ای گزارش Word</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f172a;--panel:#1e293b;--panel2:#111827;--canvas:#475569;
+  --hover:#334155;--primary:#3b82f6;--primary-h:#2563eb;
+  --success:#10b981;--danger:#ef4444;--warn:#f59e0b;
+  --text:#f8fafc;--muted:#94a3b8;--border:#334155;--border-l:#475569;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Vazirmatn',Tahoma,sans-serif}
+body{height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);overflow:hidden}
+
+.titlebar{height:38px;background:linear-gradient(90deg,#1e293b,#0f172a);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:20}
+.titlebar .app{font-weight:700;color:var(--primary);font-size:13px;display:flex;align-items:center;gap:8px}
+.titlebar .actions{display:flex;gap:6px;align-items:center}
+.tb-btn{padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:11.5px;font-weight:600;transition:.15s;font-family:inherit}
+.tb-btn:hover{background:var(--hover);border-color:var(--primary)}
+.tb-btn.success{background:var(--success);border-color:var(--success);color:#fff}
+.tb-btn.success:hover{background:#059669}
+.tb-btn.install{background:var(--primary);border-color:var(--primary);color:#fff}
+.tb-btn.install:hover{background:var(--primary-h)}
+.lang-select{height:28px;padding:0 6px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;outline:none;transition:.15s}
+.lang-select:hover,.lang-select:focus{border-color:var(--primary);background:var(--hover)}
+.lang-select option{background:var(--panel);color:var(--text)}
+
+.ribbon{background:var(--panel);border-bottom:1px solid var(--border);z-index:15;flex-shrink:0}
+.ribbon-tabs{display:flex;padding:0 8px;background:var(--panel2);border-bottom:1px solid var(--border)}
+.rtab{padding:7px 18px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12.5px;font-weight:500;position:relative;transition:.15s;font-family:inherit}
+.rtab:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.rtab.active{color:var(--primary)}
+.rtab.active::after{content:'';position:absolute;bottom:0;left:12%;right:12%;height:2px;background:var(--primary);border-radius:1px}
+.rtab.disabled{opacity:.35;cursor:not-allowed}
+.ribbon-panel{display:none;padding:6px 10px;min-height:76px;align-items:stretch;gap:2px;overflow-x:auto}
+.ribbon-panel.active{display:flex}
+.rgrp{display:flex;flex-direction:column;align-items:center;padding:0 7px;border-left:1px solid var(--border);min-width:fit-content}
+.rgrp:last-child{border-left:none}
+.rgrp-c{display:flex;gap:2px;align-items:center;flex:1;flex-wrap:wrap;justify-content:center;max-width:220px}
+.rgrp-l{font-size:9px;color:var(--muted);margin-top:3px;padding-top:3px;border-top:1px solid rgba(255,255,255,.06);width:100%;text-align:center;letter-spacing:.3px}
+.rb{background:transparent;border:1px solid transparent;color:var(--text);min-width:30px;height:30px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;padding:0 5px;transition:.15s;position:relative;font-family:inherit}
+.rb:hover{background:var(--hover);border-color:var(--border-l)}
+.rb.active{background:rgba(59,130,246,.2);border-color:var(--primary);color:var(--primary)}
+.rb:disabled{opacity:.35;cursor:not-allowed}
+.rb.lg{flex-direction:column;min-width:46px;height:50px;font-size:10px;gap:2px;line-height:1.1;padding:2px 4px}
+.rb.lg .ic{font-size:17px}
+.rsel{background:var(--bg);border:1px solid var(--border-l);color:var(--text);border-radius:4px;padding:3px 5px;font-size:11.5px;height:28px;outline:none;cursor:pointer;font-family:inherit}
+.rsel:hover,.rsel:focus{border-color:var(--primary)}
+input[type=color]{width:28px;height:28px;padding:1px;border:1px solid var(--border-l);border-radius:4px;background:transparent;cursor:pointer}
+
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{background:var(--panel);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-l{width:230px;border-left:1px solid var(--border)}
+.sidebar-r{width:270px;border-right:1px solid var(--border)}
+.sidebar-h{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;background:var(--panel2);color:var(--text);letter-spacing:.3px}
+.sidebar-b{flex:1;overflow-y:auto;padding:8px}
+
+.pg{display:flex;align-items:center;gap:4px;padding:6px 7px;background:var(--bg);border:1px solid var(--border);border-radius:5px;margin-bottom:6px;font-size:11.5px;transition:.15s}
+.pg:hover{border-color:var(--primary)}
+.pg.active{border-color:var(--primary);background:rgba(59,130,246,.1)}
+.pg-main{flex:1;min-width:0;display:flex;align-items:center;gap:4px;cursor:pointer}
+.pg-num{color:var(--muted);font-size:10px;font-weight:700;flex-shrink:0}
+.pg-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.pg-state{padding:2px 6px;border-radius:3px;font-size:9px;font-weight:800;border:none;cursor:pointer;transition:.15s;font-family:inherit;flex-shrink:0}
+.pg-state.loop{background:var(--warn);color:#000}
+.pg-state.loop:hover{background:#fbbf24}
+.pg-state.static{background:var(--border);color:var(--text)}
+.pg-state.static:hover{background:var(--border-l)}
+.pg-actions{display:flex;gap:1px;flex-shrink:0}
+.pg-actions button{width:19px;height:19px;padding:0;font-size:9px;background:transparent;border:none;color:var(--muted);cursor:pointer;border-radius:3px;display:flex;align-items:center;justify-content:center;transition:.15s;font-family:inherit}
+.pg-actions button:hover{background:var(--hover);color:var(--text)}
+.pg-actions button:disabled{opacity:.25;cursor:not-allowed}
+.pg-actions button:hover:disabled{background:transparent;color:var(--muted)}
+.pg-actions .del-btn:hover{color:var(--danger)}
+
+.cwrap{flex:1;background:var(--canvas);overflow-y:auto;padding:28px;display:flex;justify-content:center;background-image:radial-gradient(circle at 50% 0,rgba(59,130,246,.08),transparent 60%)}
+.doc{background:#fff;width:210mm;min-height:297mm;box-shadow:0 15px 40px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.05);padding:20mm;color:#111;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+.db{position:relative;z-index:1;outline:none;flex:1;min-height:250px;padding:6px;border-radius:3px;line-height:1.8}
+.db:focus{background:#f8fafc;box-shadow:inset 0 0 0 2px rgba(59,130,246,.25)}
+
+.doc table{border-collapse:collapse;width:100%;margin:8px 0}
+.doc table td,.doc table th{border:1px solid #334155;padding:6px 8px;min-width:40px;position:relative;transition:background .1s}
+.doc table td:focus{outline:none;background:#eff6ff}
+.doc table td.cell-sel{background:rgba(59,130,246,.18)!important;box-shadow:inset 0 0 0 1px var(--primary)}
+
+.img-w{position:relative;display:inline-block;max-width:100%;line-height:0;vertical-align:middle;margin:4px;user-select:none;transition:outline .1s;outline:2px solid transparent}
+.img-w.selected{outline:2px solid var(--primary)}
+.img-w img{width:100%;height:100%;display:block;pointer-events:none;border-radius:2px}
+.img-w .ih{position:absolute;width:9px;height:9px;background:#fff;border:1.5px solid var(--primary);border-radius:50%;display:none;z-index:10}
+.img-w.selected .ih{display:block}
+.img-w .ih[data-d=nw]{top:-5px;left:-5px;cursor:nwse-resize}
+.img-w .ih[data-d=n]{top:-5px;left:50%;margin-left:-5px;cursor:ns-resize}
+.img-w .ih[data-d=ne]{top:-5px;right:-5px;cursor:nesw-resize}
+.img-w .ih[data-d=e]{top:50%;right:-5px;margin-top:-5px;cursor:ew-resize}
+.img-w .ih[data-d=se]{bottom:-5px;right:-5px;cursor:nwse-resize}
+.img-w .ih[data-d=s]{bottom:-5px;left:50%;margin-left:-5px;cursor:ns-resize}
+.img-w .ih[data-d=sw]{bottom:-5px;left:-5px;cursor:nesw-resize}
+.img-w .ih[data-d=w]{top:50%;left:-5px;margin-top:-5px;cursor:ew-resize}
+.img-w .ibtn{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid var(--primary);color:var(--primary);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700;z-index:11;padding:0;line-height:1;transition:.15s}
+.img-w.selected .ibtn{display:flex}
+.img-w .ibtn:hover{background:var(--primary);color:#fff;transform:scale(1.15)}
+.img-w .ibtn.del{top:-11px;right:-11px;border-color:var(--danger);color:var(--danger)}
+.img-w .ibtn.del:hover{background:var(--danger);color:#fff}
+.img-w .ibtn.rot{bottom:-11px;right:-11px;border-color:var(--warn);color:var(--warn)}
+.img-w .ibtn.rot:hover{background:var(--warn);color:#fff}
+.img-w .ibtn.dup{bottom:-11px;left:-11px;border-color:var(--success);color:var(--success)}
+.img-w .ibtn.dup:hover{background:var(--success);color:#fff}
+
+.vgrp{margin-bottom:11px}
+.vt{font-size:10.5px;color:var(--muted);margin-bottom:4px;padding-right:4px;font-weight:600;letter-spacing:.2px}
+.vi{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:4px;margin-bottom:3px;padding:0 4px;transition:.15s}
+.vi:hover{border-color:var(--primary)}
+.vb{flex:1;text-align:left;background:transparent;border:none;color:var(--text);padding:5px 4px;cursor:pointer;font-family:monospace;font-size:11px;direction:ltr;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vb:hover{color:var(--primary)}
+.vif{background:transparent;border:none;color:var(--primary);cursor:pointer;padding:3px 5px;font-size:12px;opacity:.65;transition:.15s}
+.vif:hover{opacity:1;transform:scale(1.15)}
+
+.ctx{position:fixed;background:var(--panel);border:1px solid var(--border-l);border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:none;z-index:1000;min-width:180px;padding:4px}
+.ctx.open{display:block;animation:fadeIn .12s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.ci{padding:7px 12px;cursor:pointer;font-size:12px;color:var(--text);display:flex;justify-content:space-between;align-items:center;border-radius:4px;transition:.1s}
+.ci:hover{background:var(--primary);color:#fff}
+.ci .kbd{font-size:9.5px;opacity:.5;font-family:monospace}
+.cdiv{height:1px;background:var(--border);margin:3px 4px}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:200;padding:20px;backdrop-filter:blur(4px)}
+.modal.open{display:grid}
+.mc{background:var(--panel);width:100%;max-width:820px;border-radius:10px;display:flex;flex-direction:column;max-height:90vh;border:1px solid var(--border-l);box-shadow:0 25px 60px rgba(0,0,0,.6);animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.mh{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px}
+.mb{padding:18px;overflow-y:auto;flex:1}
+.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.ca{width:100%;min-height:420px;background:#0a0f1e;color:#a5f3fc;padding:14px;border:1px solid var(--border);border-radius:6px;font-family:Consolas,monospace;direction:ltr;text-align:left;font-size:12.5px;white-space:pre;line-height:1.5;tab-size:2}
+.xb{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px;transition:.15s;font-family:inherit}
+.xb:hover{background:var(--hover);color:var(--text)}
+.mbtn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;font-size:12px;transition:.15s;font-family:inherit}
+.mbtn.p{background:var(--primary);color:#fff}.mbtn.p:hover{background:var(--primary-h)}
+.mbtn.s{background:var(--success);color:#fff}.mbtn.s:hover{background:#059669}
+.mbtn.o{background:transparent;border:1px solid var(--border-l);color:var(--text)}.mbtn.o:hover{background:var(--hover)}
+
+.ib{background:var(--bg);border:1px solid var(--border);padding:14px;border-radius:8px}
+.ib h4{color:var(--primary);margin:0 0 8px;font-size:12.5px}
+.ib p{font-size:12px;line-height:1.7;color:#cbd5e1}
+.ib .ex{background:#000;padding:10px;border-radius:5px;font-family:monospace;direction:ltr;text-align:left;margin-top:10px;color:var(--success);font-size:11.5px;overflow-x:auto}
+
+.tgrid{display:grid;grid-template-columns:repeat(8,24px);gap:2px;margin-top:8px}
+.tgc{width:24px;height:24px;background:var(--bg);border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:.1s}
+.tgc:hover,.tgc.on{background:var(--primary);border-color:var(--primary)}
+.tglbl{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border:1px solid var(--border-l);padding:10px 20px;border-radius:8px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;transition:.25s;z-index:2000;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{border-color:var(--success);color:#86efac}
+.toast.err{border-color:var(--danger);color:#fca5a5}
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="app">📄 <span data-i18n="appTitle">ویرایشگر حرفه‌ای گزارش Word</span></div>
+  <div class="actions">
+    <select class="lang-select" id="langSelect" onchange="setLang(this.value)">
+      <option value="fa">🇮🇷 FA</option>
+      <option value="en">🇬🇧 EN</option>
+      <option value="zh">🇨🇳 中文</option>
+      <option value="ru">🇷🇺 RU</option>
+      <option value="la">🏛️ LA</option>
+      <option value="hi">🇮🇳 हि</option>
+      <option value="ar">🇸🇦 ع</option>
+    </select>
+    <button class="tb-btn" onclick="undo()" title="Ctrl+Z">↩️ <span data-i18n="undo">بازگشت</span></button>
+    <button class="tb-btn" onclick="redo()" title="Ctrl+Y">↪️ <span data-i18n="redo">جلو</span></button>
+    <button class="tb-btn install" onclick="installToMainApp()"><span data-i18n="installToMain">📥 نصب در اپ اصلی</span></button>
+    <button class="tb-btn success" onclick="generateCode()"><span data-i18n="generateCode">🚀 تولید کد</span></button>
+  </div>
+</div>
+
+<div class="ribbon">
+  <div class="ribbon-tabs" id="rtabs">
+    <button class="rtab active" data-tab="home" data-i18n="tabHome">خانه</button>
+    <button class="rtab" data-tab="insert" data-i18n="tabInsert">درج</button>
+    <button class="rtab disabled" data-tab="table" id="tabTable" data-i18n="tabTable">جدول</button>
+    <button class="rtab" data-tab="layout" data-i18n="tabLayout">چیدمان</button>
+  </div>
+
+  <div class="ribbon-panel active" data-panel="home">
+    <div class="rgrp"><div class="rgrp-c">
+      <select class="rsel" id="fontSel" style="width:110px" onchange="exec('fontName',this.value)" onmousedown="event.stopPropagation()">
+        <option value="Vazirmatn, Tahoma, sans-serif" data-i18n="fontVazir">وزیرمتن</option>
+        <option value="Tahoma, sans-serif">Tahoma</option>
+        <option value="Arial, sans-serif">Arial</option>
+      </select>
+      <select class="rsel" id="sizeSel" style="width:65px" onchange="exec('fontSize',this.value)" onmousedown="event.stopPropagation()">
+        <option value="1">10</option><option value="2">13</option>
+        <option value="3" selected>16</option><option value="4">18</option>
+        <option value="5">24</option><option value="6">32</option><option value="7">48</option>
+      </select>
+    </div><div class="rgrp-l" data-i18n="fontGroup">فونت</div></div>
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb" onmousedown="event.preventDefault()" onclick="exec('bold')" data-i18n-title="bold" title="Bold"><b>B</b></button>
+      <button class="rb" onmousedown="event.preventDefault()" onclick="exec('italic')" data-i18n-title="italic" title="Italic"><i>I</i></button>
+      <button class="rb" onmousedown="event.preventDefault()" onclick="exec('underline')" data-i18n-title="underline" title="Underline"><u>U</u></button>
+    </div><div class="rgrp-l" data-i18n="styleGroup">سبک</div></div>
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb" onmousedown="event.preventDefault()" onclick="exec('justifyRight')" data-i18n-title="alignRight" title="راست‌چین">⬅︎</button>
+      <button class="rb" onmousedown="event.preventDefault()" onclick="exec('justifyCenter')" data-i18n-title="alignCenter" title="وسط‌چین">↔</button>
+      <button class="rb" onmousedown="event.preventDefault()" onclick="exec('justifyLeft')" data-i18n-title="alignLeft" title="چپ‌چین">➡︎</button>
+    </div><div class="rgrp-l" data-i18n="paragraphGroup">پاراگراف</div></div>
+    <div class="rgrp"><div class="rgrp-c">
+      <input type="color" value="#000000" onchange="exec('foreColor',this.value)" data-i18n-title="textColor" title="رنگ متن" onmousedown="event.stopPropagation()">
+    </div><div class="rgrp-l" data-i18n="colorGroup">رنگ</div></div>
+  </div>
+
+  <div class="ribbon-panel" data-panel="insert">
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="insertImage()"><span class="ic">🖼️</span><span data-i18n="btnImage">تصویر</span></button>
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="openTablePicker()"><span class="ic">📊</span><span data-i18n="btnTable">جدول</span></button>
+    </div><div class="rgrp-l" data-i18n="insertContentGroup">درج محتوا</div></div>
+  </div>
+
+  <div class="ribbon-panel" data-panel="table">
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="addRow('above')"><span class="ic">⬆</span><span data-i18n="btnAddRowAbove">سطر بالا</span></button>
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="addRow('below')"><span class="ic">⬇</span><span data-i18n="btnAddRowBelow">سطر پایین</span></button>
+    </div><div class="rgrp-l" data-i18n="rowsGroup">سطرها</div></div>
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="addCol('left')"><span class="ic">⬅</span><span data-i18n="btnAddColLeft">ستون چپ</span></button>
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="addCol('right')"><span class="ic">➡</span><span data-i18n="btnAddColRight">ستون راست</span></button>
+    </div><div class="rgrp-l" data-i18n="colsGroup">ستون‌ها</div></div>
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="mergeCells()"><span class="ic">⬛</span><span data-i18n="btnMerge">ادغام</span></button>
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="splitCell()"><span class="ic">▦</span><span data-i18n="btnSplit">تفکیک</span></button>
+    </div><div class="rgrp-l" data-i18n="mergeSplitGroup">ادغام / تفکیک</div></div>
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="deleteRow()"><span class="ic">✂️</span><span data-i18n="btnDelRow">حذف سطر</span></button>
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="deleteCol()"><span class="ic">✂️</span><span data-i18n="btnDelCol">حذف ستون</span></button>
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="deleteTable()"><span class="ic">🗑️</span><span data-i18n="btnDelTable">حذف جدول</span></button>
+    </div><div class="rgrp-l" data-i18n="deleteGroup">حذف</div></div>
+  </div>
+
+  <div class="ribbon-panel" data-panel="layout">
+    <div class="rgrp"><div class="rgrp-c">
+      <button class="rb lg" onmousedown="event.preventDefault()" onclick="addPage()"><span class="ic">➕</span><span data-i18n="btnNewPage">صفحه جدید</span></button>
+    </div><div class="rgrp-l" data-i18n="pageGroup">صفحه</div></div>
+  </div>
+</div>
+
+<div class="main">
+  <aside class="sidebar sidebar-l">
+    <div class="sidebar-h"><span>📑 <span data-i18n="pages">صفحات</span></span>
+      <button class="tb-btn" style="padding:2px 8px;font-size:11px" onclick="addPage()" data-i18n="newPageBtn">+ جدید</button>
+    </div>
+    <div class="sidebar-b" id="pagesList"></div>
+  </aside>
+
+  <main class="cwrap">
+    <div class="doc" id="doc" dir="rtl">
+      <div class="db" id="bEdit" contenteditable="true"></div>
+    </div>
+  </main>
+
+  <aside class="sidebar sidebar-r">
+    <div class="sidebar-h">🧩 <span data-i18n="params">پارامترها</span></div>
+    <div class="sidebar-b" id="varsList"></div>
+  </aside>
+</div>
+
+<div class="ctx" id="ctxMenu"></div>
+
+<div class="modal" id="tblModal">
+  <div class="mc" style="max-width:320px">
+    <div class="mh"><span data-i18n="insertTableTitle">📊 درج جدول</span><button class="xb" onclick="closeModal('tblModal')">✕</button></div>
+    <div class="mb">
+      <div class="tgrid" id="tgrid"></div>
+      <div class="tglbl" id="tglbl" data-i18n="tableSizeHint">برای انتخاب اندازه، ماوس را بکشید</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="codeModal">
+  <div class="mc">
+    <div class="mh"><span data-i18n="codeTitle">🚀 کد نهایی (تابع exportWord)</span><button class="xb" onclick="closeModal('codeModal')">✕</button></div>
+    <div class="mb"><textarea class="ca" id="genCode" readonly></textarea></div>
+    <div class="mf">
+      <button class="mbtn o" onclick="closeModal('codeModal')" data-i18n="close">بستن</button>
+      <button class="mbtn p" onclick="copyCode()"><span data-i18n="copy">📋 کپی</span></button>
+      <button class="mbtn s" onclick="installFromCode()"><span data-i18n="installInFile">📥 نصب در فایل</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="infoModal">
+  <div class="mc" style="max-width:420px">
+    <div class="mh"><span id="infoTitle" data-i18n="helpTitle">راهنما</span><button class="xb" onclick="closeModal('infoModal')">✕</button></div>
+    <div class="mb" id="infoBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LANG_ORDER = ['fa','en','zh','ru','la','hi','ar'];
+const RTL_LANGS = ['fa','ar'];
+
+const I18N = {
+  fa: {
+    appTitle: 'ویرایشگر حرفه‌ای گزارش Word',
+    undo: 'بازگشت', redo: 'جلو', installToMain: '📥 نصب در اپ اصلی', generateCode: '🚀 تولید کد',
+    tabHome: 'خانه', tabInsert: 'درج', tabTable: 'جدول', tabLayout: 'چیدمان',
+    fontGroup: 'فونت', styleGroup: 'سبک', paragraphGroup: 'پاراگراف', colorGroup: 'رنگ',
+    insertContentGroup: 'درج محتوا', rowsGroup: 'سطرها', colsGroup: 'ستون‌ها',
+    mergeSplitGroup: 'ادغام / تفکیک', deleteGroup: 'حذف', pageGroup: 'صفحه',
+    fontVazir: 'وزیرمتن',
+    bold: 'Bold', italic: 'Italic', underline: 'Underline',
+    alignRight: 'راست‌چین', alignCenter: 'وسط‌چین', alignLeft: 'چپ‌چین', textColor: 'رنگ متن',
+    btnImage: 'تصویر', btnTable: 'جدول',
+    btnAddRowAbove: 'سطر بالا', btnAddRowBelow: 'سطر پایین',
+    btnAddColLeft: 'ستون چپ', btnAddColRight: 'ستون راست',
+    btnMerge: 'ادغام', btnSplit: 'تفکیک',
+    btnDelRow: 'حذف سطر', btnDelCol: 'حذف ستون', btnDelTable: 'حذف جدول',
+    btnNewPage: 'صفحه جدید',
+    pages: 'صفحات', newPageBtn: '+ جدید', params: 'پارامترها',
+    insertTableTitle: '📊 درج جدول', tableSizeHint: 'برای انتخاب اندازه، ماوس را بکشید',
+    codeTitle: '🚀 کد نهایی (تابع exportWord)',
+    close: 'بستن', copy: '📋 کپی', installInFile: '📥 نصب در فایل', helpTitle: 'راهنما',
+    pageCover: 'جلد گزارش (ثابت)', pageLoop: 'جدول آسیب‌پذیری (تکرار)', pageNew: 'صفحه جدید',
+    loopLabel: 'تکرار', staticLabel: 'ثابت',
+    tooltipToggle: 'تغییر حالت', tooltipUp: 'بالا', tooltipDown: 'پایین', tooltipDelete: 'حذف',
+    modeLoop: 'حالت صفحه: تکرار', modeStatic: 'حالت صفحه: ثابت',
+    minOnePage: 'حداقل یک صفحه لازم است', confirmDeletePage: 'حذف این صفحه؟',
+    clickTextFirst: 'ابتدا روی متن کلیک کنید',
+    rowAdded: 'سطر اضافه شد', colAdded: 'ستون اضافه شد',
+    rowDeleted: 'سطر حذف شد', colDeleted: 'ستون حذف شد', tableDeleted: 'جدول حذف شد',
+    cellsMerged: 'سلول‌ها ادغام شدند', cellSplit: 'سلول تفکیک شد',
+    dragSelectCells: 'ابتدا با درگ چند سلول را انتخاب کنید',
+    cellsMustBeRect: 'سلول‌ها باید مستطیل پیوسته باشند',
+    cellNotMerged: 'این سلول ادغام نشده است',
+    clickInTableFirst: 'ابتدا داخل جدول کلیک کنید',
+    clickInMergedCellFirst: 'ابتدا داخل سلول ادغام‌شده کلیک کنید',
+    exportWordNotFound: 'تابع exportWord پیدا نشد!',
+    fileUpdated: '✅ فایل به‌روزرسانی شد', codeCopied: 'کد کپی شد',
+    errorPrefix: 'خطا: ',
+    ctxDeleteImage: '✂️ حذف تصویر', ctxRotate: '↻ چرخش ۹۰°',
+    ctxRowAbove: '⬆ سطر بالا', ctxRowBelow: '⬇ سطر پایین',
+    ctxColLeft: '⬅ ستون چپ', ctxColRight: '➡ ستون راست',
+    ctxMerge: '⬛ ادغام سلول‌ها', ctxSplit: '▦ تفکیک سلول',
+    ctxDelRow: '🗑️ حذف سطر', ctxDelCol: '🗑️ حذف ستون', ctxDelTable: '🗑️ حذف جدول',
+    ctxCut: '✂️ برش', ctxCopy: '📄 کپی', ctxPaste: '📋 چسباندن',
+    ctxBold: '📝 بولد', ctxItalic: '📝 ایتالیک', ctxInsertImage: '🖼️ درج تصویر',
+    helpDesc: 'توضیحات', helpExample: 'نمونه', notAvailable: 'موجود نیست',
+    vdTestName: 'نام آسیب‌پذیری', vdTestId: 'شناسه تست', vdWstgCode: 'کد WSTG',
+    vdCatId: 'شناسه دسته', vdDesc: 'شرح کامل', vdRem: 'روش رفع',
+    vdObjectives: 'اهداف آزمون', vdNotesHtml: 'سناریو اجرایی', vdPocs: 'تصاویر POC',
+    vdAddress: 'آدرس POC', vdCweId: 'شناسه CWE', vdSevBg: 'رنگ پس‌زمینه شدت',
+    vdSevText: 'متن شدت', vdLblVulName: 'برچسب نام', vdLblOwasp: 'برچسب OWASP',
+    vdLblSeverity: 'برچسب شدت', vdLblCwe: 'برچسب CWE', vdLblAddress: 'برچسب آدرس',
+    vdLblDesc: 'برچسب شرح', vdLblScenario: 'برچسب سناریو', vdLblRem: 'برچسب رفع',
+    vdLblObjectives: 'برچسب اهداف', vdLblPocs: 'برچسب POC',
+    vdMetaSystemName: 'نام سامانه', vdMetaUrl: 'آدرس سامانه', vdMetaVersion: 'نسخه',
+    groupTestData: 'داده‌های تست', groupLabels: 'برچسب‌ها', groupMetadata: 'متادیتا'
+  },
+  en: {
+    appTitle: 'Professional Word Report Editor',
+    undo: 'Undo', redo: 'Redo', installToMain: '📥 Install to Main App', generateCode: '🚀 Generate Code',
+    tabHome: 'Home', tabInsert: 'Insert', tabTable: 'Table', tabLayout: 'Layout',
+    fontGroup: 'Font', styleGroup: 'Style', paragraphGroup: 'Paragraph', colorGroup: 'Color',
+    insertContentGroup: 'Insert Content', rowsGroup: 'Rows', colsGroup: 'Columns',
+    mergeSplitGroup: 'Merge / Split', deleteGroup: 'Delete', pageGroup: 'Page',
+    fontVazir: 'Vazirmatn',
+    bold: 'Bold', italic: 'Italic', underline: 'Underline',
+    alignRight: 'Align Right', alignCenter: 'Center', alignLeft: 'Align Left', textColor: 'Text Color',
+    btnImage: 'Image', btnTable: 'Table',
+    btnAddRowAbove: 'Row Above', btnAddRowBelow: 'Row Below',
+    btnAddColLeft: 'Column Left', btnAddColRight: 'Column Right',
+    btnMerge: 'Merge', btnSplit: 'Split',
+    btnDelRow: 'Delete Row', btnDelCol: 'Delete Column', btnDelTable: 'Delete Table',
+    btnNewPage: 'New Page',
+    pages: 'Pages', newPageBtn: '+ New', params: 'Parameters',
+    insertTableTitle: '📊 Insert Table', tableSizeHint: 'Drag mouse to select size',
+    codeTitle: '🚀 Final Code (exportWord function)',
+    close: 'Close', copy: '📋 Copy', installInFile: '📥 Install in File', helpTitle: 'Help',
+    pageCover: 'Report Cover (Static)', pageLoop: 'Vulnerability Table (Loop)', pageNew: 'New Page',
+    loopLabel: 'Loop', staticLabel: 'Static',
+    tooltipToggle: 'Toggle mode', tooltipUp: 'Up', tooltipDown: 'Down', tooltipDelete: 'Delete',
+    modeLoop: 'Page mode: Loop', modeStatic: 'Page mode: Static',
+    minOnePage: 'At least one page is required', confirmDeletePage: 'Delete this page?',
+    clickTextFirst: 'Click on text first',
+    rowAdded: 'Row added', colAdded: 'Column added',
+    rowDeleted: 'Row deleted', colDeleted: 'Column deleted', tableDeleted: 'Table deleted',
+    cellsMerged: 'Cells merged', cellSplit: 'Cell split',
+    dragSelectCells: 'First drag to select cells',
+    cellsMustBeRect: 'Cells must form a continuous rectangle',
+    cellNotMerged: 'This cell is not merged',
+    clickInTableFirst: 'Click inside the table first',
+    clickInMergedCellFirst: 'Click inside the merged cell first',
+    exportWordNotFound: 'exportWord function not found!',
+    fileUpdated: '✅ File updated', codeCopied: 'Code copied',
+    errorPrefix: 'Error: ',
+    ctxDeleteImage: '✂️ Delete Image', ctxRotate: '↻ Rotate 90°',
+    ctxRowAbove: '⬆ Row Above', ctxRowBelow: '⬇ Row Below',
+    ctxColLeft: '⬅ Column Left', ctxColRight: '➡ Column Right',
+    ctxMerge: '⬛ Merge Cells', ctxSplit: '▦ Split Cell',
+    ctxDelRow: '🗑️ Delete Row', ctxDelCol: '🗑️ Delete Column', ctxDelTable: '🗑️ Delete Table',
+    ctxCut: '✂️ Cut', ctxCopy: '📄 Copy', ctxPaste: '📋 Paste',
+    ctxBold: '📝 Bold', ctxItalic: '📝 Italic', ctxInsertImage: '🖼️ Insert Image',
+    helpDesc: 'Description', helpExample: 'Example', notAvailable: 'Not available',
+    vdTestName: 'Vulnerability name', vdTestId: 'Test ID', vdWstgCode: 'WSTG code',
+    vdCatId: 'Category ID', vdDesc: 'Full description', vdRem: 'Remediation method',
+    vdObjectives: 'Test objectives', vdNotesHtml: 'Exploit scenario', vdPocs: 'POC images',
+    vdAddress: 'POC address', vdCweId: 'CWE ID', vdSevBg: 'Severity background color',
+    vdSevText: 'Severity text', vdLblVulName: 'Name label', vdLblOwasp: 'OWASP label',
+    vdLblSeverity: 'Severity label', vdLblCwe: 'CWE label', vdLblAddress: 'Address label',
+    vdLblDesc: 'Description label', vdLblScenario: 'Scenario label', vdLblRem: 'Remediation label',
+    vdLblObjectives: 'Objectives label', vdLblPocs: 'POC label',
+    vdMetaSystemName: 'System name', vdMetaUrl: 'System URL', vdMetaVersion: 'Version',
+    groupTestData: 'Test Data', groupLabels: 'Labels', groupMetadata: 'Metadata'
+  },
+  zh: {
+    appTitle: '专业 Word 报告编辑器',
+    undo: '撤销', redo: '重做', installToMain: '📥 安装到主应用', generateCode: '🚀 生成代码',
+    tabHome: '主页', tabInsert: '插入', tabTable: '表格', tabLayout: '布局',
+    fontGroup: '字体', styleGroup: '样式', paragraphGroup: '段落', colorGroup: '颜色',
+    insertContentGroup: '插入内容', rowsGroup: '行', colsGroup: '列',
+    mergeSplitGroup: '合并 / 拆分', deleteGroup: '删除', pageGroup: '页面',
+    fontVazir: 'Vazirmatn',
+    bold: '加粗', italic: '斜体', underline: '下划线',
+    alignRight: '右对齐', alignCenter: '居中', alignLeft: '左对齐', textColor: '文字颜色',
+    btnImage: '图片', btnTable: '表格',
+    btnAddRowAbove: '上方行', btnAddRowBelow: '下方行',
+    btnAddColLeft: '左侧列', btnAddColRight: '右侧列',
+    btnMerge: '合并', btnSplit: '拆分',
+    btnDelRow: '删除行', btnDelCol: '删除列', btnDelTable: '删除表格',
+    btnNewPage: '新页面',
+    pages: '页面', newPageBtn: '+ 新建', params: '参数',
+    insertTableTitle: '📊 插入表格', tableSizeHint: '拖动鼠标选择尺寸',
+    codeTitle: '🚀 最终代码（exportWord 函数）',
+    close: '关闭', copy: '📋 复制', installInFile: '📥 安装到文件', helpTitle: '帮助',
+    pageCover: '报告封面（静态）', pageLoop: '漏洞表格（循环）', pageNew: '新页面',
+    loopLabel: '循环', staticLabel: '静态',
+    tooltipToggle: '切换模式', tooltipUp: '上移', tooltipDown: '下移', tooltipDelete: '删除',
+    modeLoop: '页面模式：循环', modeStatic: '页面模式：静态',
+    minOnePage: '至少需要一页', confirmDeletePage: '删除此页面？',
+    clickTextFirst: '请先点击文本',
+    rowAdded: '已添加行', colAdded: '已添加列',
+    rowDeleted: '已删除行', colDeleted: '已删除列', tableDeleted: '已删除表格',
+    cellsMerged: '已合并单元格', cellSplit: '已拆分单元格',
+    dragSelectCells: '请先拖动选择单元格',
+    cellsMustBeRect: '单元格必须为连续矩形',
+    cellNotMerged: '该单元格未合并',
+    clickInTableFirst: '请先在表格内点击',
+    clickInMergedCellFirst: '请先在合并单元格内点击',
+    exportWordNotFound: '未找到 exportWord 函数！',
+    fileUpdated: '✅ 文件已更新', codeCopied: '代码已复制',
+    errorPrefix: '错误：',
+    ctxDeleteImage: '✂️ 删除图片', ctxRotate: '↻ 旋转 90°',
+    ctxRowAbove: '⬆ 上方行', ctxRowBelow: '⬇ 下方行',
+    ctxColLeft: '⬅ 左侧列', ctxColRight: '➡ 右侧列',
+    ctxMerge: '⬛ 合并单元格', ctxSplit: '▦ 拆分单元格',
+    ctxDelRow: '🗑️ 删除行', ctxDelCol: '🗑️ 删除列', ctxDelTable: '🗑️ 删除表格',
+    ctxCut: '✂️ 剪切', ctxCopy: '📄 复制', ctxPaste: '📋 粘贴',
+    ctxBold: '📝 加粗', ctxItalic: '📝 斜体', ctxInsertImage: '🖼️ 插入图片',
+    helpDesc: '描述', helpExample: '示例', notAvailable: '不可用',
+    vdTestName: '漏洞名称', vdTestId: '测试 ID', vdWstgCode: 'WSTG 代码',
+    vdCatId: '类别 ID', vdDesc: '完整描述', vdRem: '修复方法',
+    vdObjectives: '测试目标', vdNotesHtml: '利用场景', vdPocs: 'POC 图片',
+    vdAddress: 'POC 地址', vdCweId: 'CWE ID', vdSevBg: '严重程度背景色',
+    vdSevText: '严重程度文本', vdLblVulName: '名称标签', vdLblOwasp: 'OWASP 标签',
+    vdLblSeverity: '严重程度标签', vdLblCwe: 'CWE 标签', vdLblAddress: '地址标签',
+    vdLblDesc: '描述标签', vdLblScenario: '场景标签', vdLblRem: '修复标签',
+    vdLblObjectives: '目标标签', vdLblPocs: 'POC 标签',
+    vdMetaSystemName: '系统名称', vdMetaUrl: '系统 URL', vdMetaVersion: '版本',
+    groupTestData: '测试数据', groupLabels: '标签', groupMetadata: '元数据'
+  },
+  ru: {
+    appTitle: 'Профессиональный редактор отчётов Word',
+    undo: 'Отменить', redo: 'Повторить', installToMain: '📥 Установить в приложение', generateCode: '🚀 Сгенерировать код',
+    tabHome: 'Главная', tabInsert: 'Вставка', tabTable: 'Таблица', tabLayout: 'Макет',
+    fontGroup: 'Шрифт', styleGroup: 'Стиль', paragraphGroup: 'Абзац', colorGroup: 'Цвет',
+    insertContentGroup: 'Вставка содержимого', rowsGroup: 'Строки', colsGroup: 'Столбцы',
+    mergeSplitGroup: 'Объединить / Разделить', deleteGroup: 'Удалить', pageGroup: 'Страница',
+    fontVazir: 'Vazirmatn',
+    bold: 'Жирный', italic: 'Курсив', underline: 'Подчёркнутый',
+    alignRight: 'По правому краю', alignCenter: 'По центру', alignLeft: 'По левому краю', textColor: 'Цвет текста',
+    btnImage: 'Изображение', btnTable: 'Таблица',
+    btnAddRowAbove: 'Строка выше', btnAddRowBelow: 'Строка ниже',
+    btnAddColLeft: 'Столбец слева', btnAddColRight: 'Столбец справа',
+    btnMerge: 'Объединить', btnSplit: 'Разделить',
+    btnDelRow: 'Удалить строку', btnDelCol: 'Удалить столбец', btnDelTable: 'Удалить таблицу',
+    btnNewPage: 'Новая страница',
+    pages: 'Страницы', newPageBtn: '+ Новая', params: 'Параметры',
+    insertTableTitle: '📊 Вставить таблицу', tableSizeHint: 'Перетащите мышь для выбора размера',
+    codeTitle: '🚀 Итоговый код (функция exportWord)',
+    close: 'Закрыть', copy: '📋 Копировать', installInFile: '📥 Установить в файл', helpTitle: 'Справка',
+    pageCover: 'Обложка отчёта (статическая)', pageLoop: 'Таблица уязвимостей (цикл)', pageNew: 'Новая страница',
+    loopLabel: 'Цикл', staticLabel: 'Статическая',
+    tooltipToggle: 'Переключить режим', tooltipUp: 'Вверх', tooltipDown: 'Вниз', tooltipDelete: 'Удалить',
+    modeLoop: 'Режим страницы: цикл', modeStatic: 'Режим страницы: статическая',
+    minOnePage: 'Требуется минимум одна страница', confirmDeletePage: 'Удалить эту страницу?',
+    clickTextFirst: 'Сначала нажмите на текст',
+    rowAdded: 'Строка добавлена', colAdded: 'Столбец добавлен',
+    rowDeleted: 'Строка удалена', colDeleted: 'Столбец удалён', tableDeleted: 'Таблица удалена',
+    cellsMerged: 'Ячейки объединены', cellSplit: 'Ячейка разделена',
+    dragSelectCells: 'Сначала выделите ячейки перетаскиванием',
+    cellsMustBeRect: 'Ячейки должны образовывать непрерывный прямоугольник',
+    cellNotMerged: 'Эта ячейка не объединена',
+    clickInTableFirst: 'Сначала нажмите внутри таблицы',
+    clickInMergedCellFirst: 'Сначала нажмите внутри объединённой ячейки',
+    exportWordNotFound: 'Функция exportWord не найдена!',
+    fileUpdated: '✅ Файл обновлён', codeCopied: 'Код скопирован',
+    errorPrefix: 'Ошибка: ',
+    ctxDeleteImage: '✂️ Удалить изображение', ctxRotate: '↻ Повернуть 90°',
+    ctxRowAbove: '⬆ Строка выше', ctxRowBelow: '⬇ Строка ниже',
+    ctxColLeft: '⬅ Столбец слева', ctxColRight: '➡ Столбец справа',
+    ctxMerge: '⬛ Объединить ячейки', ctxSplit: '▦ Разделить ячейку',
+    ctxDelRow: '🗑️ Удалить строку', ctxDelCol: '🗑️ Удалить столбец', ctxDelTable: '🗑️ Удалить таблицу',
+    ctxCut: '✂️ Вырезать', ctxCopy: '📄 Копировать', ctxPaste: '📋 Вставить',
+    ctxBold: '📝 Жирный', ctxItalic: '📝 Курсив', ctxInsertImage: '🖼️ Вставить изображение',
+    helpDesc: 'Описание', helpExample: 'Пример', notAvailable: 'Недоступно',
+    vdTestName: 'Название уязвимости', vdTestId: 'ID теста', vdWstgCode: 'Код WSTG',
+    vdCatId: 'ID категории', vdDesc: 'Полное описание', vdRem: 'Метод устранения',
+    vdObjectives: 'Цели теста', vdNotesHtml: 'Сценарий эксплуатации', vdPocs: 'Изображения POC',
+    vdAddress: 'Адрес POC', vdCweId: 'CWE ID', vdSevBg: 'Фоновый цвет серьёзности',
+    vdSevText: 'Текст серьёзности', vdLblVulName: 'Метка названия', vdLblOwasp: 'Метка OWASP',
+    vdLblSeverity: 'Метка серьёзности', vdLblCwe: 'Метка CWE', vdLblAddress: 'Метка адреса',
+    vdLblDesc: 'Метка описания', vdLblScenario: 'Метка сценария', vdLblRem: 'Метка исправления',
+    vdLblObjectives: 'Метка целей', vdLblPocs: 'Метка POC',
+    vdMetaSystemName: 'Имя системы', vdMetaUrl: 'URL системы', vdMetaVersion: 'Версия',
+    groupTestData: 'Данные теста', groupLabels: 'Метки', groupMetadata: 'Метаданные'
+  },
+  la: {
+    appTitle: 'Editor Professionalis Relationis Word',
+    undo: 'Regredi', redo: 'Procedere', installToMain: '📥 Installa in App', generateCode: '🚀 Generare Codicem',
+    tabHome: 'Domus', tabInsert: 'Inserere', tabTable: 'Tabula', tabLayout: 'Dispositio',
+    fontGroup: 'Fons', styleGroup: 'Stylus', paragraphGroup: 'Paragraphus', colorGroup: 'Color',
+    insertContentGroup: 'Inserere Contentum', rowsGroup: 'Lineae', colsGroup: 'Columnae',
+    mergeSplitGroup: 'Confundere / Dividere', deleteGroup: 'Delere', pageGroup: 'Pagina',
+    fontVazir: 'Vazirmatn',
+    bold: 'Crassus', italic: 'Italicus', underline: 'Subtractus',
+    alignRight: 'Dextra', alignCenter: 'Medium', alignLeft: 'Sinistra', textColor: 'Color Textus',
+    btnImage: 'Imago', btnTable: 'Tabula',
+    btnAddRowAbove: 'Linea Super', btnAddRowBelow: 'Linea Infer',
+    btnAddColLeft: 'Columna Sinistra', btnAddColRight: 'Columna Dextra',
+    btnMerge: 'Confundere', btnSplit: 'Dividere',
+    btnDelRow: 'Delere Lineam', btnDelCol: 'Delere Columnam', btnDelTable: 'Delere Tabulam',
+    btnNewPage: 'Nova Pagina',
+    pages: 'Paginae', newPageBtn: '+ Nova', params: 'Parametri',
+    insertTableTitle: '📊 Inserere Tabulam', tableSizeHint: 'Trahe murem ad magnitudinem seligendam',
+    codeTitle: '🚀 Codex Finalis (functio exportWord)',
+    close: 'Claudere', copy: '📋 Copiare', installInFile: '📥 Installa in Fasciculum', helpTitle: 'Auxilium',
+    pageCover: 'Tegumentum Relationis (Staticum)', pageLoop: 'Tabula Vulnerabilitatum (Iteratio)', pageNew: 'Nova Pagina',
+    loopLabel: 'Iteratio', staticLabel: 'Staticum',
+    tooltipToggle: 'Mutare modum', tooltipUp: 'Sursum', tooltipDown: 'Deorsum', tooltipDelete: 'Delere',
+    modeLoop: 'Modus paginae: Iteratio', modeStatic: 'Modus paginae: Staticum',
+    minOnePage: 'Saltem una pagina necessaria est', confirmDeletePage: 'Delere hanc paginam?',
+    clickTextFirst: 'Primum preme textum',
+    rowAdded: 'Linea addita', colAdded: 'Columna addita',
+    rowDeleted: 'Linea deleta', colDeleted: 'Columna deleta', tableDeleted: 'Tabula deleta',
+    cellsMerged: 'Cellulae confusae', cellSplit: 'Cellula divisa',
+    dragSelectCells: 'Primum trahe ut cellulas seligas',
+    cellsMustBeRect: 'Cellulae debent esse rectangulum continuum',
+    cellNotMerged: 'Haec cellula non confusa est',
+    clickInTableFirst: 'Primum preme intra tabulam',
+    clickInMergedCellFirst: 'Primum preme intra cellulam confusam',
+    exportWordNotFound: 'Functio exportWord non inventa est!',
+    fileUpdated: '✅ Fasciculus renovatus', codeCopied: 'Codex copiatus',
+    errorPrefix: 'Error: ',
+    ctxDeleteImage: '✂️ Delere Imaginem', ctxRotate: '↻ Rotare 90°',
+    ctxRowAbove: '⬆ Linea Super', ctxRowBelow: '⬇ Linea Infer',
+    ctxColLeft: '⬅ Columna Sinistra', ctxColRight: '➡ Columna Dextra',
+    ctxMerge: '⬛ Confundere Cellulas', ctxSplit: '▦ Dividere Cellulam',
+    ctxDelRow: '🗑️ Delere Lineam', ctxDelCol: '🗑️ Delere Columnam', ctxDelTable: '🗑️ Delere Tabulam',
+    ctxCut: '✂️ Secare', ctxCopy: '📄 Copiare', ctxPaste: '📋 Lutare',
+    ctxBold: '📝 Crassus', ctxItalic: '📝 Italicus', ctxInsertImage: '🖼️ Inserere Imaginem',
+    helpDesc: 'Descriptio', helpExample: 'Exemplum', notAvailable: 'Non praesto',
+    vdTestName: 'Nomen vulnerabilitatis', vdTestId: 'ID examinationis', vdWstgCode: 'Codex WSTG',
+    vdCatId: 'ID categoriae', vdDesc: 'Descriptio completa', vdRem: 'Methodus correctionis',
+    vdObjectives: 'Scopos examinationis', vdNotesHtml: 'Scenarium executionis', vdPocs: 'Imagines POC',
+    vdAddress: 'Inscriptio POC', vdCweId: 'CWE ID', vdSevBg: 'Color fundi severitatis',
+    vdSevText: 'Textus severitatis', vdLblVulName: 'Pittacium nominis', vdLblOwasp: 'Pittacium OWASP',
+    vdLblSeverity: 'Pittacium severitatis', vdLblCwe: 'Pittacium CWE', vdLblAddress: 'Pittacium inscriptio',
+    vdLblDesc: 'Pittacium descriptionis', vdLblScenario: 'Pittacium scenarii', vdLblRem: 'Pittacium correctionis',
+    vdLblObjectives: 'Pittacium scoporum', vdLblPocs: 'Pittacium POC',
+    vdMetaSystemName: 'Nomen systematis', vdMetaUrl: 'URL systematis', vdMetaVersion: 'Versio',
+    groupTestData: 'Data Examinationis', groupLabels: 'Pittacia', groupMetadata: 'Metadata'
+  },
+  hi: {
+    appTitle: 'पेशेवर Word रिपोर्ट संपादक',
+    undo: 'पूर्ववत करें', redo: 'फिर से करें', installToMain: '📥 मुख्य ऐप में इंस्टॉल करें', generateCode: '🚀 कोड जनरेट करें',
+    tabHome: 'होम', tabInsert: 'सम्मिलित करें', tabTable: 'तालिका', tabLayout: 'लेआउट',
+    fontGroup: 'फ़ॉन्ट', styleGroup: 'शैली', paragraphGroup: 'अनुच्छेद', colorGroup: 'रंग',
+    insertContentGroup: 'सामग्री सम्मिलित करें', rowsGroup: 'पंक्तियाँ', colsGroup: 'स्तंभ',
+    mergeSplitGroup: 'मर्ज / स्प्लिट', deleteGroup: 'हटाएं', pageGroup: 'पृष्ठ',
+    fontVazir: 'Vazirmatn',
+    bold: 'बोल्ड', italic: 'इटैलिक', underline: 'अंडरलाइन',
+    alignRight: 'दाएं', alignCenter: 'केंद्र', alignLeft: 'बाएं', textColor: 'पाठ रंग',
+    btnImage: 'छवि', btnTable: 'तालिका',
+    btnAddRowAbove: 'ऊपर पंक्ति', btnAddRowBelow: 'नीचे पंक्ति',
+    btnAddColLeft: 'बाएं स्तंभ', btnAddColRight: 'दाएं स्तंभ',
+    btnMerge: 'मर्ज', btnSplit: 'स्प्लिट',
+    btnDelRow: 'पंक्ति हटाएं', btnDelCol: 'स्तंभ हटाएं', btnDelTable: 'तालिका हटाएं',
+    btnNewPage: 'नया पृष्ठ',
+    pages: 'पृष्ठ', newPageBtn: '+ नया', params: 'पैरामीटर',
+    insertTableTitle: '📊 तालिका सम्मिलित करें', tableSizeHint: 'आकार चुनने के लिए माउस खींचें',
+    codeTitle: '🚀 अंतिम कोड (exportWord फ़ंक्शन)',
+    close: 'बंद करें', copy: '📋 कॉपी करें', installInFile: '📥 फ़ाइल में इंस्टॉल करें', helpTitle: 'सहायता',
+    pageCover: 'रिपोर्ट कवर (स्थिर)', pageLoop: 'भेद्यता तालिका (लूप)', pageNew: 'नया पृष्ठ',
+    loopLabel: 'लूप', staticLabel: 'स्थिर',
+    tooltipToggle: 'मोड बदलें', tooltipUp: 'ऊपर', tooltipDown: 'नीचे', tooltipDelete: 'हटाएं',
+    modeLoop: 'पृष्ठ मोड: लूप', modeStatic: 'पृष्ठ मोड: स्थिर',
+    minOnePage: 'कम से कम एक पृष्ठ आवश्यक है', confirmDeletePage: 'इस पृष्ठ को हटाएं?',
+    clickTextFirst: 'पहले पाठ पर क्लिक करें',
+    rowAdded: 'पंक्ति जोड़ी गई', colAdded: 'स्तंभ जोड़ा गया',
+    rowDeleted: 'पंक्ति हटाई गई', colDeleted: 'स्तंभ हटाया गया', tableDeleted: 'तालिका हटाई गई',
+    cellsMerged: 'कोशिकाएँ मर्ज की गईं', cellSplit: 'कोशिका विभाजित',
+    dragSelectCells: 'पहले कोशिकाओं का चयन करने के लिए ड्रैग करें',
+    cellsMustBeRect: 'कोशिकाएँ एक सतत आयत बनानी चाहिए',
+    cellNotMerged: 'यह कोशिका मर्ज नहीं है',
+    clickInTableFirst: 'पहले तालिका के अंदर क्लिक करें',
+    clickInMergedCellFirst: 'पहले मर्ज की गई कोशिका के अंदर क्लिक करें',
+    exportWordNotFound: 'exportWord फ़ंक्शन नहीं मिला!',
+    fileUpdated: '✅ फ़ाइल अपडेट की गई', codeCopied: 'कोड कॉपी किया गया',
+    errorPrefix: 'त्रुटि: ',
+    ctxDeleteImage: '✂️ छवि हटाएं', ctxRotate: '↻ 90° घुमाएं',
+    ctxRowAbove: '⬆ ऊपर पंक्ति', ctxRowBelow: '⬇ नीचे पंक्ति',
+    ctxColLeft: '⬅ बाएं स्तंभ', ctxColRight: '➡ दाएं स्तंभ',
+    ctxMerge: '⬛ कोशिकाएँ मर्ज करें', ctxSplit: '▦ कोशिका विभाजित करें',
+    ctxDelRow: '🗑️ पंक्ति हटाएं', ctxDelCol: '🗑️ स्तंभ हटाएं', ctxDelTable: '🗑️ तालिका हटाएं',
+    ctxCut: '✂️ काटें', ctxCopy: '📄 कॉपी करें', ctxPaste: '📋 चिपकाएं',
+    ctxBold: '📝 बोल्ड', ctxItalic: '📝 इटैलिक', ctxInsertImage: '🖼️ छवि सम्मिलित करें',
+    helpDesc: 'विवरण', helpExample: 'उदाहरण', notAvailable: 'उपलब्ध नहीं',
+    vdTestName: 'भेद्यता नाम', vdTestId: 'परीक्षण ID', vdWstgCode: 'WSTG कोड',
+    vdCatId: 'श्रेणी ID', vdDesc: 'पूर्ण विवरण', vdRem: 'उपचार विधि',
+    vdObjectives: 'परीक्षण उद्देश्य', vdNotesHtml: 'शोषण परिदृश्य', vdPocs: 'POC चित्र',
+    vdAddress: 'POC पता', vdCweId: 'CWE ID', vdSevBg: 'गंभीरता पृष्ठभूमि रंग',
+    vdSevText: 'गंभीरता पाठ', vdLblVulName: 'नाम लेबल', vdLblOwasp: 'OWASP लेबल',
+    vdLblSeverity: 'गंभीरता लेबल', vdLblCwe: 'CWE लेबल', vdLblAddress: 'पता लेबल',
+    vdLblDesc: 'विवरण लेबल', vdLblScenario: 'परिदृश्य लेबल', vdLblRem: 'उपचार लेबल',
+    vdLblObjectives: 'उद्देश्य लेबल', vdLblPocs: 'POC लेबल',
+    vdMetaSystemName: 'सिस्टम नाम', vdMetaUrl: 'सिस्टम URL', vdMetaVersion: 'संस्करण',
+    groupTestData: 'परीक्षण डेटा', groupLabels: 'लेबल', groupMetadata: 'मेटाडेटा'
+  },
+  ar: {
+    appTitle: 'محرر تقارير Word الاحترافي',
+    undo: 'تراجع', redo: 'إعادة', installToMain: '📥 تثبيت في التطبيق الرئيسي', generateCode: '🚀 توليد الكود',
+    tabHome: 'الرئيسية', tabInsert: 'إدراج', tabTable: 'جدول', tabLayout: 'التخطيط',
+    fontGroup: 'الخط', styleGroup: 'النمط', paragraphGroup: 'الفقرة', colorGroup: 'اللون',
+    insertContentGroup: 'إدراج محتوى', rowsGroup: 'الصفوف', colsGroup: 'الأعمدة',
+    mergeSplitGroup: 'دمج / تقسيم', deleteGroup: 'حذف', pageGroup: 'صفحة',
+    fontVazir: 'Vazirmatn',
+    bold: 'عريض', italic: 'مائل', underline: 'تسطير',
+    alignRight: 'يمين', alignCenter: 'وسط', alignLeft: 'يسار', textColor: 'لون النص',
+    btnImage: 'صورة', btnTable: 'جدول',
+    btnAddRowAbove: 'صف أعلى', btnAddRowBelow: 'صف أسفل',
+    btnAddColLeft: 'عمود يسار', btnAddColRight: 'عمود يمين',
+    btnMerge: 'دمج', btnSplit: 'تقسيم',
+    btnDelRow: 'حذف صف', btnDelCol: 'حذف عمود', btnDelTable: 'حذف جدول',
+    btnNewPage: 'صفحة جديدة',
+    pages: 'الصفحات', newPageBtn: '+ جديد', params: 'المعاملات',
+    insertTableTitle: '📊 إدراج جدول', tableSizeHint: 'اسحب الماوس لاختيار الحجم',
+    codeTitle: '🚀 الكود النهائي (دالة exportWord)',
+    close: 'إغلاق', copy: '📋 نسخ', installInFile: '📥 تثبيت في الملف', helpTitle: 'مساعدة',
+    pageCover: 'غلاف التقرير (ثابت)', pageLoop: 'جدول الثغرات (تكرار)', pageNew: 'صفحة جديدة',
+    loopLabel: 'تكرار', staticLabel: 'ثابت',
+    tooltipToggle: 'تبديل الوضع', tooltipUp: 'أعلى', tooltipDown: 'أسفل', tooltipDelete: 'حذف',
+    modeLoop: 'وضع الصفحة: تكرار', modeStatic: 'وضع الصفحة: ثابت',
+    minOnePage: 'مطلوب صفحة واحدة على الأقل', confirmDeletePage: 'حذف هذه الصفحة؟',
+    clickTextFirst: 'انقر على النص أولاً',
+    rowAdded: 'تمت إضافة صف', colAdded: 'تمت إضافة عمود',
+    rowDeleted: 'تم حذف صف', colDeleted: 'تم حذف عمود', tableDeleted: 'تم حذف الجدول',
+    cellsMerged: 'تم دمج الخلايا', cellSplit: 'تم تقسيم الخلية',
+    dragSelectCells: 'اسحب أولاً لتحديد الخلايا',
+    cellsMustBeRect: 'يجب أن تشكل الخلايا مستطيلاً مستمراً',
+    cellNotMerged: 'هذه الخلية غير مدموجة',
+    clickInTableFirst: 'انقر داخل الجدول أولاً',
+    clickInMergedCellFirst: 'انقر داخل الخلية المدموجة أولاً',
+    exportWordNotFound: 'لم يتم العثور على دالة exportWord!',
+    fileUpdated: '✅ تم تحديث الملف', codeCopied: 'تم نسخ الكود',
+    errorPrefix: 'خطأ: ',
+    ctxDeleteImage: '✂️ حذف الصورة', ctxRotate: '↻ تدوير 90°',
+    ctxRowAbove: '⬆ صف أعلى', ctxRowBelow: '⬇ صف أسفل',
+    ctxColLeft: '⬅ عمود يسار', ctxColRight: '➡ عمود يمين',
+    ctxMerge: '⬛ دمج الخلايا', ctxSplit: '▦ تقسيم الخلية',
+    ctxDelRow: '🗑️ حذف صف', ctxDelCol: '🗑️ حذف عمود', ctxDelTable: '🗑️ حذف جدول',
+    ctxCut: '✂️ قص', ctxCopy: '📄 نسخ', ctxPaste: '📋 لصق',
+    ctxBold: '📝 عريض', ctxItalic: '📝 مائل', ctxInsertImage: '🖼️ إدراج صورة',
+    helpDesc: 'الوصف', helpExample: 'مثال', notAvailable: 'غير متوفر',
+    vdTestName: 'اسم الثغرة', vdTestId: 'معرف الاختبار', vdWstgCode: 'كود WSTG',
+    vdCatId: 'معرف الفئة', vdDesc: 'الوصف الكامل', vdRem: 'طريقة الإصلاح',
+    vdObjectives: 'أهداف الاختبار', vdNotesHtml: 'سيناريو الاستغلال', vdPocs: 'صور POC',
+    vdAddress: 'عنوان POC', vdCweId: 'CWE ID', vdSevBg: 'لون خلفية الخطورة',
+    vdSevText: 'نص الخطورة', vdLblVulName: 'تسمية الاسم', vdLblOwasp: 'تسمية OWASP',
+    vdLblSeverity: 'تسمية الخطورة', vdLblCwe: 'تسمية CWE', vdLblAddress: 'تسمية العنوان',
+    vdLblDesc: 'تسمية الوصف', vdLblScenario: 'تسمية السيناريو', vdLblRem: 'تسمية الإصلاح',
+    vdLblObjectives: 'تسمية الأهداف', vdLblPocs: 'تسمية POC',
+    vdMetaSystemName: 'اسم النظام', vdMetaUrl: 'عنوان URL للنظام', vdMetaVersion: 'الإصدار',
+    groupTestData: 'بيانات الاختبار', groupLabels: 'التسميات', groupMetadata: 'البيانات الوصفية'
+  }
+};
+
+let currentLang = localStorage.getItem('wstg_editor_lang') || 'fa';
+
+function t(key){ return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.fa[key]) || key; }
+
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  document.documentElement.dir = RTL_LANGS.includes(currentLang) ? 'rtl' : 'ltr';
+  document.documentElement.lang = currentLang;
+  document.title = t('appTitle');
+  const ls = document.getElementById('langSelect');
+  if(ls) ls.value = currentLang;
+}
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('wstg_editor_lang', lang);
+  applyI18n();
+  renderVars();
+  renderPages();
+}
+
+const varDetails = {
+  '${testName}': {descKey:'vdTestName', example:'آزمون پیمایش دایرکتوری'},
+  '${test.id}': {descKey:'vdTestId', example:'WSTG-ATHZ-01'},
+  '${test.wstg_code}': {descKey:'vdWstgCode', example:'WSTG-ATHZ-01'},
+  '${test.categoryId}': {descKey:'vdCatId', example:'A01'},
+  '${desc}': {descKey:'vdDesc', example:'توضیحات...'},
+  '${rem}': {descKey:'vdRem', example:'اعتبارسنجی ورودی'},
+  '${objectives}': {descKey:'vdObjectives', example:'شناسایی نقاط ورودی'},
+  '${notesHtml}': {descKey:'vdNotesHtml', example:'<b>متن</b>'},
+  '${pocs}': {descKey:'vdPocs', example:'<img src="...">'},
+  '${address}': {descKey:'vdAddress', example:'https://ex.com'},
+  '${cweId}': {descKey:'vdCweId', example:'209'},
+  '${sevBg}': {descKey:'vdSevBg', example:'#dc2626'},
+  '${sevText}': {descKey:'vdSevText', example:'خطرناک'},
+  '${L.vulName}': {descKey:'vdLblVulName', example:'نام آسیب‌پذیری'},
+  '${L.owaspTitle}': {descKey:'vdLblOwasp', example:'عنوان OWASP'},
+  '${L.severity}': {descKey:'vdLblSeverity', example:'سطح شدت'},
+  '${L.cweId}': {descKey:'vdLblCwe', example:'شناسه CWE'},
+  '${L.address}': {descKey:'vdLblAddress', example:'آدرس'},
+  '${L.description}': {descKey:'vdLblDesc', example:'شرح'},
+  '${L.exploitScenario}': {descKey:'vdLblScenario', example:'سناریو'},
+  '${L.remediation}': {descKey:'vdLblRem', example:'رفع'},
+  '${L.objectives}': {descKey:'vdLblObjectives', example:'اهداف'},
+  '${L.pocs}': {descKey:'vdLblPocs', example:'مستندات'},
+  '${meta.systemName}': {descKey:'vdMetaSystemName', example:'پورتال'},
+  '${meta.url}': {descKey:'vdMetaUrl', example:'https://ex.com'},
+  '${meta.version}': {descKey:'vdMetaVersion', example:'1.0.0'}
+};
+
+const varsGroups = [
+  { key:'groupTestData', vars:['${testName}','${test.id}','${test.wstg_code}','${test.categoryId}','${desc}','${rem}','${objectives}','${notesHtml}','${pocs}','${address}','${cweId}','${sevBg}','${sevText}'] },
+  { key:'groupLabels', vars:['${L.vulName}','${L.owaspTitle}','${L.severity}','${L.cweId}','${L.address}','${L.description}','${L.exploitScenario}','${L.remediation}','${L.objectives}','${L.pocs}'] },
+  { key:'groupMetadata', vars:['${meta.systemName}','${meta.url}','${meta.version}'] }
+];
+
+let appState = {
+  pages: [
+    { id:1, titleKey:'pageCover', title:'جلد گزارش (ثابت)', isLoop:false,
+      body:'<div style="text-align:center;margin-top:120px;"><h1 style="font-size:36px;color:#1e293b;">گزارش ارزیابی امنیتی</h1><p style="margin-top:20px;font-size:18px;">سامانه: ${meta.systemName}</p><p style="font-size:16px;">نسخه: ${meta.version}</p></div>' },
+    { id:2, titleKey:'pageLoop', title:'جدول آسیب‌پذیری (تکرار)', isLoop:true,
+      body:`<table style="width:100%;border-collapse:collapse;font-size:13px;" border="1">
+        <tr><td style="padding:8px;font-weight:bold;text-align:center;">\${L.vulName}</td><td style="padding:8px;font-weight:bold;text-align:center;">\${L.owaspTitle}</td><td style="padding:8px;font-weight:bold;text-align:center;">\${L.severity}</td><td style="padding:8px;font-weight:bold;text-align:center;">\${L.cweId}</td></tr>
+        <tr><td style="padding:8px;text-align:center;">\${testName}</td><td style="padding:8px;text-align:center;">\${test.wstg_code}</td><td style="padding:8px;text-align:center;background-color:\${sevBg};color:#fff;font-weight:bold;">\${sevText}</td><td style="padding:8px;text-align:center;">\${cweId}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">\${L.address}</td><td colspan="3" style="padding:8px;direction:ltr;text-align:left;">\${address}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">\${L.description}</td><td colspan="3" style="padding:8px;">\${desc}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">\${L.exploitScenario}</td><td colspan="3" style="padding:8px;">\${notesHtml}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">\${L.remediation}</td><td colspan="3" style="padding:8px;">\${rem}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">\${L.objectives}</td><td colspan="3" style="padding:8px;">\${objectives}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">\${L.pocs}</td><td colspan="3" style="padding:8px;text-align:center;">\${pocs}</td></tr>
+      </table>` }
+  ],
+  activePageId: 1
+};
+
+let historyStack = [], historyIndex = -1;
+let activeEditor = null, savedRange = null;
+let activeCell = null;
+let currentTableTab = false;
+let imgResize = null;
+let cellSelStart = null, cellSelEnd = null;
+
+const $ = id => document.getElementById(id);
+const bEdit = $('bEdit');
+const editors = [bEdit];
+
+function init(){
+  applyI18n();
+  renderVars();
+  renderPages();
+  loadPage();
+  setupRibbon();
+  setupEditorEvents();
+  setupKeyboard();
+  setupContextMenu();
+  saveHistory();
+}
+
+function setupRibbon(){
+  document.querySelectorAll('.rtab').forEach(t => {
+    t.onclick = () => {
+      if(t.classList.contains('disabled')) return;
+      document.querySelectorAll('.rtab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.ribbon-panel').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.querySelector(`.ribbon-panel[data-panel="${t.dataset.tab}"]`).classList.add('active');
+    };
+  });
+  const grid = $('tgrid');
+  for(let r=0;r<8;r++){
+    for(let c=0;c<8;c++){
+      const cell = document.createElement('div');
+      cell.className = 'tgc'; cell.dataset.r = r+1; cell.dataset.c = c+1;
+      cell.onmouseenter = () => {
+        document.querySelectorAll('.tgc').forEach(x=>{
+          x.classList.toggle('on', +x.dataset.r <= r+1 && +x.dataset.c <= c+1);
+        });
+        $('tglbl').textContent = `${r+1} × ${c+1}`;
+      };
+      cell.onclick = () => { createTable(r+1, c+1); closeModal('tblModal'); };
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function renderPages(){
+  const list = $('pagesList');
+  list.innerHTML = '';
+  appState.pages.forEach((p,i) => {
+    const displayTitle = p.titleKey ? t(p.titleKey) : p.title;
+    const div = document.createElement('div');
+    div.className = 'pg' + (p.id===appState.activePageId?' active':'');
+    div.innerHTML = `
+      <div class="pg-main" data-id="${p.id}">
+        <span class="pg-num">${i+1}.</span>
+        <span class="pg-title" title="${displayTitle}">${displayTitle}</span>
+      </div>
+      <button class="pg-state ${p.isLoop?'loop':'static'}" data-action="toggle" title="${t('tooltipToggle')}">${p.isLoop?t('loopLabel'):t('staticLabel')}</button>
+      <div class="pg-actions">
+        <button data-action="up" title="${t('tooltipUp')}" ${i===0?'disabled':''}>▲</button>
+        <button data-action="down" title="${t('tooltipDown')}" ${i===appState.pages.length-1?'disabled':''}>▼</button>
+        <button data-action="delete" class="del-btn" title="${t('tooltipDelete')}">✕</button>
+      </div>`;
+
+    div.querySelector('.pg-main').onclick = () => switchPage(p.id);
+    div.querySelector('[data-action="toggle"]').onclick = (e) => {
+      e.stopPropagation(); p.isLoop = !p.isLoop; renderPages(); saveHistory();
+      toast(p.isLoop ? t('modeLoop') : t('modeStatic'), 'ok');
+    };
+    div.querySelector('[data-action="up"]').onclick = (e) => { e.stopPropagation(); movePage(p.id, -1); };
+    div.querySelector('[data-action="down"]').onclick = (e) => { e.stopPropagation(); movePage(p.id, +1); };
+    div.querySelector('[data-action="delete"]').onclick = (e) => { e.stopPropagation(); deletePage(p.id); };
+    list.appendChild(div);
+  });
+}
+
+function movePage(id, delta){
+  const idx = appState.pages.findIndex(p => p.id === id);
+  if(idx === -1) return;
+  const newIdx = idx + delta;
+  if(newIdx < 0 || newIdx >= appState.pages.length) return;
+  const tmp = appState.pages[idx];
+  appState.pages[idx] = appState.pages[newIdx];
+  appState.pages[newIdx] = tmp;
+  renderPages(); saveHistory();
+}
+
+function addPage(){
+  const p = { id:Date.now(), titleKey:'pageNew', title:'صفحه جدید', isLoop:false, body:'<p>متن...</p>' };
+  appState.pages.push(p); appState.activePageId = p.id;
+  renderPages(); loadPage(); saveHistory();
+}
+function deletePage(id){
+  if(appState.pages.length<=1) return toast(t('minOnePage'),'err');
+  if(!confirm(t('confirmDeletePage'))) return;
+  appState.pages = appState.pages.filter(p=>p.id!==id);
+  if(appState.activePageId===id) appState.activePageId = appState.pages[0].id;
+  renderPages(); loadPage(); saveHistory();
+}
+function switchPage(id){ appState.activePageId = id; renderPages(); loadPage(); }
+
+function loadPage(){
+  const p = appState.pages.find(x=>x.id===appState.activePageId);
+  if(!p) return;
+  bEdit.innerHTML = p.body;
+  bEdit.querySelectorAll('.img-w').forEach(w => initImageWrapper(w));
+  checkTableContext();
+}
+function savePageContent(){
+  const p = appState.pages.find(x=>x.id===appState.activePageId);
+  if(!p) return;
+  p.body = bEdit.innerHTML;
+}
+
+function renderVars(){
+  const cont = $('varsList'); cont.innerHTML = '';
+  varsGroups.forEach(g => {
+    const d = document.createElement('div'); d.className = 'vgrp';
+    d.innerHTML = `<div class="vt">${t(g.key)}</div>`;
+    g.vars.forEach(v => {
+      const item = document.createElement('div'); item.className = 'vi';
+      item.innerHTML = `<button class="vb" onmousedown="event.preventDefault()" onclick="insertVar('${v.replace(/'/g,"\\'")}')">${v}</button><button class="vif" onmousedown="event.preventDefault()" onclick="showInfo('${v.replace(/'/g,"\\'")}')">ℹ️</button>`;
+      d.appendChild(item);
+    });
+    cont.appendChild(d);
+  });
+}
+function showInfo(k){
+  const info = varDetails[k] || {descKey:'notAvailable', example:'—'};
+  $('infoTitle').textContent = k;
+  $('infoBody').innerHTML = `<div class="ib"><h4>${t('helpDesc')}</h4><p>${t(info.descKey)}</p><h4 style="margin-top:14px">${t('helpExample')}</h4><div class="ex">${info.example}</div></div>`;
+  openModal('infoModal');
+}
+function insertVar(v){
+  if(!activeEditor) return toast(t('clickTextFirst'),'err');
+  activeEditor.focus(); restoreSel(); document.execCommand('insertText', false, v); activeEditor.dispatchEvent(new Event('input'));
+}
+
+function exec(cmd, val=null){
+  if(!activeEditor) return;
+  activeEditor.focus(); restoreSel();
+  document.execCommand('styleWithCSS', false, true); document.execCommand(cmd, false, val);
+  activeEditor.dispatchEvent(new Event('input')); saveSel();
+}
+function restoreSel(){
+  if(savedRange){ const s = window.getSelection(); s.removeAllRanges(); s.addRange(savedRange); }
+}
+function saveSel(){
+  const s = window.getSelection();
+  if(s.rangeCount && activeEditor && activeEditor.contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange();
+}
+
+function setupEditorEvents(){
+  editors.forEach(ed => {
+    ed.addEventListener('focus', () => activeEditor = ed);
+    ed.addEventListener('mouseup', saveSel);
+    ed.addEventListener('keyup', () => { saveSel(); updateActiveCell(); checkTableContext(); });
+    ed.addEventListener('click', e => {
+      updateActiveCell();
+      const w = e.target.closest('.img-w');
+      document.querySelectorAll('.img-w.selected').forEach(x=>{ if(x!==w) x.classList.remove('selected'); });
+      if(w){ w.classList.add('selected'); }
+    });
+    ed.addEventListener('mousedown', e => {
+      const cell = e.target.closest('td,th');
+      if(cell) activeCell = cell;
+    });
+    ed.addEventListener('input', () => { savePageContent(); saveHistoryDebounced(); checkTableContext(); });
+  });
+
+  document.addEventListener('mousedown', e => {
+    if(e.target.closest('.ribbon') || e.target.closest('.sidebar') || e.target.closest('.modal') || e.target.closest('.ctx') || e.target.closest('.img-w') || e.target.closest('.ibtn')) return;
+    if(!e.target.closest('td,th')) activeCell = null;
+  }, true);
+
+  document.addEventListener('mousedown', e => {
+    if(!e.target.closest('.img-w') && !e.target.closest('.ibtn')){
+      document.querySelectorAll('.img-w.selected').forEach(x=>x.classList.remove('selected'));
+    }
+  });
+  document.addEventListener('mousemove', onImgMove);
+  document.addEventListener('mouseup', onImgUp);
+  document.addEventListener('mousedown', onCellDown);
+  document.addEventListener('mousemove', onCellMove);
+  document.addEventListener('mouseup', onCellUp);
+}
+
+function updateActiveCell(){
+  const sel = window.getSelection();
+  if(!sel.rangeCount) return;
+  let node = sel.anchorNode;
+  if(node && node.nodeType === 3) node = node.parentNode;
+  while(node && node !== document.body){
+    if(node.tagName === 'TD' || node.tagName === 'TH'){ activeCell = node; return; }
+    node = node.parentNode;
+  }
+}
+
+function setupKeyboard(){
+  document.addEventListener('keydown', e => {
+    if(!activeEditor) return;
+    const ctrl = e.ctrlKey || e.metaKey;
+    if(ctrl && e.key==='b'){ e.preventDefault(); exec('bold'); }
+    if(ctrl && e.key==='i'){ e.preventDefault(); exec('italic'); }
+    if(ctrl && e.key==='u'){ e.preventDefault(); exec('underline'); }
+    if(ctrl && e.key==='z' && !e.shiftKey){ e.preventDefault(); undo(); }
+    if((ctrl && e.key==='y') || (ctrl && e.shiftKey && e.key==='Z')){ e.preventDefault(); redo(); }
+    if(e.key==='Delete' || e.key==='Backspace'){
+      const sel = document.querySelector('.img-w.selected');
+      if(sel){ e.preventDefault(); sel.remove(); savePageContent(); saveHistoryDebounced(); }
+    }
+    if(e.key==='Escape'){
+      document.querySelectorAll('.img-w.selected').forEach(x=>x.classList.remove('selected'));
+      document.querySelectorAll('td.cell-sel').forEach(x=>x.classList.remove('cell-sel'));
+    }
+  });
+}
+
+function insertImage(){
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
+  input.onchange = (e) => {
+    Array.from(e.target.files).forEach(file => {
+      const rd = new FileReader();
+      rd.onload = (ev) => {
+        if(!activeEditor) activeEditor = bEdit;
+        const w = createImageWrapper(ev.target.result);
+        activeEditor.focus(); restoreSel();
+        const sel = window.getSelection();
+        if(sel.rangeCount){
+          const r = sel.getRangeAt(0); r.deleteContents(); r.insertNode(w); r.setStartAfter(w); r.collapse(true);
+          sel.removeAllRanges(); sel.addRange(r);
+        } else { activeEditor.appendChild(w); }
+        savePageContent(); saveHistoryDebounced(); w.classList.add('selected');
+      };
+      rd.readAsDataURL(file);
+    });
+  };
+  input.click();
+}
+
+function createImageWrapper(src){
+  const w = document.createElement('div');
+  w.className = 'img-w'; w.contentEditable = 'false'; w.dataset.rotation = 0; w.style.width = '240px';
+  const img = document.createElement('img'); img.src = src; w.appendChild(img);
+  ['nw','n','ne','e','se','s','sw','w'].forEach(d => {
+    const h = document.createElement('div'); h.className = 'ih'; h.dataset.d = d; w.appendChild(h);
+  });
+  const del = document.createElement('button'); del.className = 'ibtn del'; del.innerHTML = '×'; del.title = 'حذف';
+  del.onmousedown = e => e.preventDefault();
+  del.onclick = e => { e.stopPropagation(); w.remove(); savePageContent(); saveHistoryDebounced(); };
+  w.appendChild(del);
+  const rot = document.createElement('button'); rot.className = 'ibtn rot'; rot.innerHTML = '↻'; rot.title = 'چرخش ۹۰°';
+  rot.onmousedown = e => e.preventDefault();
+  rot.onclick = e => {
+    e.stopPropagation(); w.dataset.rotation = (parseInt(w.dataset.rotation||0) + 90) % 360;
+    img.style.transform = `rotate(${w.dataset.rotation}deg)`; savePageContent(); saveHistoryDebounced();
+  };
+  w.appendChild(rot);
+  const dup = document.createElement('button'); dup.className = 'ibtn dup'; dup.innerHTML = '⧉'; dup.title = 'کپی';
+  dup.onmousedown = e => e.preventDefault();
+  dup.onclick = e => {
+    e.stopPropagation(); const clone = createImageWrapper(img.src);
+    clone.style.width = w.style.width; clone.style.height = w.style.height;
+    w.parentNode.insertBefore(clone, w.nextSibling); savePageContent(); saveHistoryDebounced();
+  };
+  w.appendChild(dup);
+  initImageWrapper(w); return w;
+}
+
+function initImageWrapper(w){
+  w.querySelectorAll('.ih').forEach(h => {
+    h.addEventListener('mousedown', e => {
+      e.preventDefault(); e.stopPropagation();
+      const rect = w.getBoundingClientRect();
+      imgResize = { w, dir: h.dataset.d, startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height };
+      w.classList.add('selected');
+    });
+  });
+  w.addEventListener('mousedown', e => {
+    if(e.target.closest('.ibtn') || e.target.closest('.ih')) return;
+    e.preventDefault();
+    document.querySelectorAll('.img-w.selected').forEach(x=>{ if(x!==w) x.classList.remove('selected'); });
+    w.classList.add('selected');
+  });
+}
+
+function onImgMove(e){
+  if(!imgResize) return;
+  const dx = e.clientX - imgResize.startX, dy = e.clientY - imgResize.startY, d = imgResize.dir;
+  let nw = imgResize.startW, nh = imgResize.startH;
+  if(d.includes('e')) nw = Math.max(40, imgResize.startW + dx);
+  if(d.includes('w')) nw = Math.max(40, imgResize.startW - dx);
+  if(d.includes('s')) nh = Math.max(30, imgResize.startH + dy);
+  if(d.includes('n')) nh = Math.max(30, imgResize.startH - dy);
+  imgResize.w.style.width = nw + 'px';
+  if(d==='n'||d==='s'||d==='nw'||d==='ne'||d==='sw'||d==='se') imgResize.w.style.height = nh + 'px';
+}
+function onImgUp(){ if(imgResize){ imgResize = null; savePageContent(); saveHistoryDebounced(); } }
+
+function openTablePicker(){ openModal('tblModal'); }
+function createTable(rows, cols){
+  if(!activeEditor) activeEditor = bEdit;
+  let html = '<table><tbody>';
+  for(let i=0;i<rows;i++){ html += '<tr>'; for(let j=0;j<cols;j++) html += '<td>&nbsp;</td>'; html += '</tr>'; }
+  html += '</tbody></table><p><br></p>';
+  activeEditor.focus(); restoreSel(); document.execCommand('insertHTML', false, html);
+  savePageContent(); saveHistoryDebounced();
+}
+
+function getCurrentCell(){
+  const sel = window.getSelection();
+  if(sel.rangeCount && sel.anchorNode){
+    let node = sel.anchorNode;
+    if(node && node.nodeType === 3) node = node.parentNode;
+    while(node && node !== document.body){
+      if(node.tagName === 'TD' || node.tagName === 'TH') return node;
+      node = node.parentNode;
+    }
+  }
+  if(activeCell && activeCell.isConnected) return activeCell;
+  return null;
+}
+
+function checkTableContext(){
+  const cell = getCurrentCell();
+  const tab = document.getElementById('tabTable');
+  if(cell){ tab.classList.remove('disabled'); currentTableTab = true; }
+  else {
+    tab.classList.add('disabled');
+    if(tab.classList.contains('active')) switchTab('home');
+    currentTableTab = false;
+  }
+}
+function switchTab(name){
+  document.querySelectorAll('.rtab').forEach(t => t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.ribbon-panel').forEach(p => p.classList.toggle('active', p.dataset.panel===name));
+}
+
+function addRow(pos){
+  const cell = getCurrentCell(); if(!cell) return toast(t('clickInTableFirst'),'err');
+  const row = cell.parentElement, colCount = row.children.length;
+  const newRow = document.createElement('tr');
+  for(let i=0;i<colCount;i++){ const td = document.createElement('td'); td.innerHTML='&nbsp;'; newRow.appendChild(td); }
+  if(pos === 'above') row.parentNode.insertBefore(newRow, row); else row.parentNode.insertBefore(newRow, row.nextSibling);
+  savePageContent(); saveHistoryDebounced(); toast(t('rowAdded'),'ok');
+}
+
+function addCol(pos){
+  const cell = getCurrentCell(); if(!cell) return toast(t('clickInTableFirst'),'err');
+  const cellIdx = Array.from(cell.parentElement.children).indexOf(cell);
+  const table = cell.closest('table');
+  table.querySelectorAll('tr').forEach(row => {
+    const newTd = document.createElement('td'); newTd.innerHTML = '&nbsp;';
+    const ref = row.children[cellIdx];
+    if(ref){ if(pos === 'left') row.insertBefore(newTd, ref); else row.insertBefore(newTd, ref.nextSibling); }
+    else { row.appendChild(newTd); }
+  });
+  savePageContent(); saveHistoryDebounced(); toast(t('colAdded'),'ok');
+}
+
+function deleteRow(){
+  const cell = getCurrentCell(); if(!cell) return toast(t('clickInTableFirst'),'err');
+  const row = cell.parentElement, table = row.closest('table');
+  if(table.querySelectorAll('tr').length <= 1) return deleteTable();
+  row.remove(); savePageContent(); saveHistoryDebounced(); toast(t('rowDeleted'),'ok');
+}
+
+function deleteCol(){
+  const cell = getCurrentCell(); if(!cell) return toast(t('clickInTableFirst'),'err');
+  const cellIdx = Array.from(cell.parentElement.children).indexOf(cell);
+  const table = cell.closest('table');
+  table.querySelectorAll('tr').forEach(row => { if(row.children[cellIdx]) row.children[cellIdx].remove(); });
+  savePageContent(); saveHistoryDebounced(); toast(t('colDeleted'),'ok');
+}
+
+function deleteTable(){
+  const cell = getCurrentCell(); if(!cell) return;
+  const table = cell.closest('table'); table.remove(); activeCell = null;
+  savePageContent(); saveHistoryDebounced(); checkTableContext(); toast(t('tableDeleted'),'ok');
+}
+
+function onCellDown(e){
+  const cell = e.target.closest('td,th'); if(!cell) return;
+  if(e.shiftKey || e.button===2) return;
+  if(e.target.closest('.ibtn') || e.target.closest('.ih')) return;
+  document.querySelectorAll('td.cell-sel,th.cell-sel').forEach(x=>x.classList.remove('cell-sel'));
+  cellSelStart = cell; cellSelEnd = cell; activeCell = cell;
+}
+function onCellMove(e){
+  if(!cellSelStart) return;
+  const over = e.target.closest('td,th'); if(!over) return;
+  if(!over.closest('table') || over.closest('table') !== cellSelStart.closest('table')) return;
+  if(over === cellSelEnd) return;
+  cellSelEnd = over; highlightCellRange();
+}
+function onCellUp(){
+  if(!cellSelStart) return;
+  const start = cellSelStart, end = cellSelEnd;
+  const table = start.closest('table'), allCells = Array.from(table.querySelectorAll('td,th'));
+  const count = Math.abs(allCells.indexOf(end) - allCells.indexOf(start)) + 1;
+  cellSelStart = null; cellSelEnd = null;
+  if(count >= 2) switchTab('table'); else document.querySelectorAll('td.cell-sel,th.cell-sel').forEach(x=>x.classList.remove('cell-sel'));
+}
+function highlightCellRange(){
+  if(!cellSelStart || !cellSelEnd) return;
+  const table = cellSelStart.closest('table'), rows = Array.from(table.querySelectorAll('tr'));
+  const startRow = rows.indexOf(cellSelStart.parentElement), endRow = rows.indexOf(cellSelEnd.parentElement);
+  const startCol = Array.from(cellSelStart.parentElement.children).indexOf(cellSelStart);
+  const endCol = Array.from(cellSelEnd.parentElement.children).indexOf(cellSelEnd);
+  const r1 = Math.min(startRow, endRow), r2 = Math.max(startRow, endRow);
+  const c1 = Math.min(startCol, endCol), c2 = Math.max(startCol, endCol);
+  document.querySelectorAll('td.cell-sel,th.cell-sel').forEach(x=>x.classList.remove('cell-sel'));
+  for(let r=r1; r<=r2; r++){
+    const row = rows[r]; if(!row) continue;
+    for(let c=c1; c<=c2; c++){ const cell = row.children[c]; if(cell) cell.classList.add('cell-sel'); }
+  }
+}
+
+function mergeCells(){
+  const sel = document.querySelectorAll('td.cell-sel,th.cell-sel');
+  if(sel.length < 2) return toast(t('dragSelectCells'),'err');
+  const table = sel[0].closest('table'), rows = Array.from(table.querySelectorAll('tr'));
+  const coords = Array.from(sel).map(c => ({ cell:c, row:rows.indexOf(c.parentElement), col:Array.from(c.parentElement.children).indexOf(c) }));
+  const minR = Math.min(...coords.map(x=>x.row)), maxR = Math.max(...coords.map(x=>x.row));
+  const minC = Math.min(...coords.map(x=>x.col)), maxC = Math.max(...coords.map(x=>x.col));
+  const rowSpan = maxR-minR+1, colSpan = maxC-minC+1;
+  if(coords.length !== rowSpan*colSpan) return toast(t('cellsMustBeRect'),'err');
+  const topLeft = coords.find(x=>x.row===minR && x.col===minC).cell;
+  let combinedContent = topLeft.innerHTML;
+  coords.forEach(x => { if(x.cell !== topLeft && x.cell.innerHTML.trim() !== '&nbsp;') combinedContent += '<br>' + x.cell.innerHTML; });
+  topLeft.innerHTML = combinedContent; topLeft.rowSpan = rowSpan; topLeft.colSpan = colSpan;
+  coords.forEach(x => { if(x.cell !== topLeft) x.cell.remove(); });
+  rows.forEach(r => { if(r.children.length===0) r.remove(); });
+  document.querySelectorAll('td.cell-sel').forEach(x=>x.classList.remove('cell-sel'));
+  savePageContent(); saveHistoryDebounced(); toast(t('cellsMerged'),'ok');
+}
+
+function splitCell(){
+  const cell = getCurrentCell(); if(!cell) return toast(t('clickInMergedCellFirst'),'err');
+  const rs = cell.rowSpan || 1, cs = cell.colSpan || 1;
+  if(rs===1 && cs===1) return toast(t('cellNotMerged'),'err');
+  const table = cell.closest('table'), row = cell.parentElement, colIdx = Array.from(row.children).indexOf(cell);
+  cell.rowSpan = 1; cell.colSpan = 1;
+  for(let i=1;i<cs;i++){ const td = document.createElement('td'); td.innerHTML='&nbsp;'; row.insertBefore(td, cell.nextSibling); }
+  const rows = Array.from(table.querySelectorAll('tr')), rowIdx = rows.indexOf(row);
+  for(let r=1;r<rs;r++){
+    const targetRow = rows[rowIdx+r]; if(!targetRow) continue;
+    for(let c=0;c<cs;c++){
+      const td = document.createElement('td'); td.innerHTML='&nbsp;';
+      const refCell = targetRow.children[colIdx];
+      if(refCell) targetRow.insertBefore(td, refCell); else targetRow.appendChild(td);
+    }
+  }
+  savePageContent(); saveHistoryDebounced(); toast(t('cellSplit'),'ok');
+}
+
+function setupContextMenu(){
+  document.addEventListener('contextmenu', e => {
+    const editor = e.target.closest('.db'); if(!editor) return;
+    e.preventDefault(); activeEditor = editor; saveSel();
+    const ctx = $('ctxMenu'), items = [];
+    const img = e.target.closest('.img-w'), cell = e.target.closest('td,th');
+    if(cell) activeCell = cell;
+    if(img){
+      items.push({l:t('ctxDeleteImage'),a:()=>{ img.remove(); savePageContent(); saveHistoryDebounced(); }});
+      items.push({l:t('ctxRotate'),a:()=>{ const i=img.querySelector('img'); img.dataset.rotation=(parseInt(img.dataset.rotation||0)+90)%360; i.style.transform=`rotate(${img.dataset.rotation}deg)`; }});
+      items.push({div:true});
+    }
+    if(cell){
+      items.push({l:t('ctxRowAbove'),a:()=>addRow('above')}); items.push({l:t('ctxRowBelow'),a:()=>addRow('below')});
+      items.push({l:t('ctxColLeft'),a:()=>addCol('left')}); items.push({l:t('ctxColRight'),a:()=>addCol('right')});
+      items.push({div:true});
+      items.push({l:t('ctxMerge'),a:mergeCells}); items.push({l:t('ctxSplit'),a:splitCell});
+      items.push({div:true});
+      items.push({l:t('ctxDelRow'),a:deleteRow}); items.push({l:t('ctxDelCol'),a:deleteCol}); items.push({l:t('ctxDelTable'),a:deleteTable});
+      items.push({div:true});
+    }
+    items.push({l:t('ctxCut'),a:()=>exec('cut'),kbd:'Ctrl+X'}); items.push({l:t('ctxCopy'),a:()=>exec('copy'),kbd:'Ctrl+C'}); items.push({l:t('ctxPaste'),a:()=>exec('paste'),kbd:'Ctrl+V'});
+    items.push({div:true});
+    items.push({l:t('ctxBold'),a:()=>exec('bold'),kbd:'Ctrl+B'}); items.push({l:t('ctxItalic'),a:()=>exec('italic'),kbd:'Ctrl+I'});
+    items.push({div:true}); items.push({l:t('ctxInsertImage'),a:insertImage});
+
+    ctx.innerHTML = '';
+    items.forEach(it => {
+      if(it.div){ const d = document.createElement('div'); d.className='cdiv'; ctx.appendChild(d); }
+      else {
+        const b = document.createElement('div'); b.className = 'ci';
+        b.innerHTML = `<span>${it.l}</span>${it.kbd?`<span class="kbd">${it.kbd}</span>`:''}`;
+        b.onclick = () => { it.a(); closeCtx(); }; ctx.appendChild(b);
+      }
+    });
+    const x = Math.min(e.clientX, window.innerWidth - 200), y = Math.min(e.clientY, window.innerHeight - ctx.scrollHeight - 10);
+    ctx.style.left = x + 'px'; ctx.style.top = y + 'px'; ctx.classList.add('open');
+  });
+  document.addEventListener('click', e => { if(!e.target.closest('.ctx')) closeCtx(); });
+}
+function closeCtx(){ $('ctxMenu').classList.remove('open'); }
+
+let saveTimer = null;
+function saveHistoryDebounced(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveHistory, 800); }
+function saveHistory(){ historyStack = historyStack.slice(0, historyIndex+1); historyStack.push(JSON.stringify(appState.pages)); historyIndex++; if(historyStack.length > 50){ historyStack.shift(); historyIndex--; } }
+function undo(){ if(historyIndex > 0){ historyIndex--; appState.pages = JSON.parse(historyStack[historyIndex]); renderPages(); loadPage(); } }
+function redo(){ if(historyIndex < historyStack.length - 1){ historyIndex++; appState.pages = JSON.parse(historyStack[historyIndex]); renderPages(); loadPage(); } }
+
+function cleanHtml(html){
+  const div = document.createElement('div'); div.innerHTML = html;
+  div.querySelectorAll('.ih,.ibtn').forEach(x=>x.remove());
+  div.querySelectorAll('.img-w').forEach(w => {
+    const img = w.querySelector('img'); if(!img) { w.remove(); return; }
+    const newImg = document.createElement('img'); newImg.src = img.src;
+    newImg.style.width = w.style.width || '240px';
+    if(w.style.height) newImg.style.height = w.style.height;
+    newImg.style.display = 'block';
+    if(w.dataset.rotation && w.dataset.rotation !== '0') newImg.style.transform = `rotate(${w.dataset.rotation}deg)`;
+    w.replaceWith(newImg);
+  });
+  div.querySelectorAll('.cell-sel').forEach(x=>x.classList.remove('cell-sel'));
+  div.querySelectorAll('[contenteditable]').forEach(x=>x.removeAttribute('contenteditable'));
+  return div.innerHTML;
+}
+
+function buildExportWordFunction(){
+  let pagesCode = '';
+  let isFirst = true;
+  const PAGE_WRAP_START = '<div style="page-break-before:always; mso-break-type:page-break; mso-pagination:none;"><p style="margin:0;padding:0;height:0;line-height:0;font-size:1pt;color:#ffffff;">.</p>';
+  const PAGE_WRAP_END = '</div>';
+
+  appState.pages.forEach((page) => {
+    const bodyClean = cleanHtml(page.body);
+    const safeBody = bodyClean.replace(/`/g, '\\`');
+
+    if (page.isLoop) {
+      pagesCode += `
+        allPagesHtml += failedTests.map((test, index) => {
+            const catName = catDisplayName(test.categoryCat);
+            const testName = loc(test, 'name') || test.id;
+            const desc = loc(test, 'description') || '';
+            const rem = loc(test, 'remediation') || '';
+            const objectives = locArr(test, 'objectives').join('<br>');
+            const notesHtml = test.notes.trim() ? test.notes : \`<span style="color:#666;">\${L.autoFill}</span>\`;
+            let pocs = test.poc_images && test.poc_images.length > 0 ? test.poc_images.map(img => \`<img src="\${img.data}" width="800" height="800" style="max-width:100%;margin:5px;border:1px solid #ccc;" />\`).join('') : '—';
+            const cweId = test.cwe_id || '209';
+            const address = test.poc_url || '';
+            const sevBg = SEV_COLORS_WORD[test.severity] || '#dc2626';
+            const sevText = t(test.severity);
+            ${isFirst
+              ? `return (index === 0 ? '<div>' : PAGE_WRAP_START) + \`\n${safeBody}\n\` + PAGE_WRAP_END;`
+              : `return PAGE_WRAP_START + \`\n${safeBody}\n\` + PAGE_WRAP_END;`
+            }
+        }).join('');
+      `;
+      isFirst = false;
+    } else {
+      if (isFirst) {
+        pagesCode += `
+          allPagesHtml += \`<div>\n${safeBody}\n</div>\n\`;
+        `;
+      } else {
+        pagesCode += `
+          allPagesHtml += PAGE_WRAP_START + \`\n${safeBody}\n\` + PAGE_WRAP_END;
+        `;
+      }
+      isFirst = false;
+    }
+  });
+
+  return `function exportWord() {
+    if (!meta) { showToast(t('wordNoMeta'), 'error'); return; }
+    const failedTests = flatTests.filter(t => t.status === 'fail');
+    if (!failedTests.length) { showToast(t('noFailed'), 'error'); return; }
+
+    const PAGE_WRAP_START = '<div style="page-break-before:always; mso-break-type:page-break; mso-pagination:none;"><p style="margin:0;padding:0;height:0;line-height:0;font-size:1pt;color:#ffffff;">.</p>';
+    const PAGE_WRAP_END = '</div>';
+
+    const L = currentLang === 'fa' ? { vulName: 'نام آسیب پذیری', owaspTitle: 'عنوان متداول OWASP', sensitiveErr: 'پیام خطای حاوی اطلاعات حساس', severity: 'سطح شدت', cweId: 'شناسه CWE', address: 'آدرس آسیب پذیری', description: 'شرح آسیب پذیری', exploitScenario: 'توضیح آسیب پذیری سناریو اجرایی', remediation: 'روش رفع آسیب پذیری', objectives: 'اهداف آزمون', pocs: 'مستندات تصویری', autoFill: 'توسط خود ارزیاب تکمیل می گردد' } : { vulName: 'Vulnerability Name', owaspTitle: 'OWASP Common Title', sensitiveErr: 'Sensitive Error Message', severity: 'Severity Level', cweId: 'CWE ID', address: 'Vulnerability Address', description: 'Vulnerability Description', exploitScenario: 'Exploit Scenario Description', remediation: 'Remediation Method', objectives: 'Test Objectives', pocs: 'Visual Documentation', autoFill: 'To be completed by the assessor' };
+
+    let allPagesHtml = '';
+
+${pagesCode}
+
+    const html = \`<!DOCTYPE html>
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" dir="rtl">
+    <head><meta charset="UTF-8"><title>WSTG Report</title>
+    <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+    <style>
+        @page { size: 21cm 29.7cm; margin: 2cm; mso-page-orientation: portrait; }
+        @page Section1 { size: 21cm 29.7cm; margin: 2cm; }
+        div.Section1 { page: Section1; }
+        body { font-family: Tahoma, Arial, sans-serif; direction: rtl; margin: 0; padding: 0; }
+        table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+        td, th { border: 1px solid #000; padding: 6px; }
+        img { max-width: 100%; height: auto; page-break-inside: avoid; }
+        p { margin: 0; }
+    </style>
+    </head>
+    <body>
+        \${allPagesHtml}
+    </body>
+    </html>\`;
+
+    const blob = new Blob(['\\ufeff', html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const sysName = (meta.systemName || 'report').replace(/[^a-zA-Z0-9\\u0600-\\u06FF]/g, '-');
+    a.href = url;
+    a.download = \`wstg-report-\${sysName}-\${new Date().toISOString().slice(0,10)}.doc\`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(t('wordToast'), 'success');
+}`;
+}
+
+function generateCode(){
+  $('genCode').value = buildExportWordFunction();
+  openModal('codeModal');
+}
+
+function copyCode(){ const t = $('genCode'); t.select(); document.execCommand('copy'); toast(t('codeCopied'),'ok'); }
+
+function installToMainApp(){
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.html,.htm';
+  input.onchange = async (e) => {
+    const file = e.target.files[0]; if(!file) return;
+    try {
+      const content = await file.text();
+      const newFunc = buildExportWordFunction();
+      const patched = replaceExportWordFunction(content, newFunc);
+      if(patched === null){ toast(t('exportWordNotFound'),'err'); return; }
+      const blob = new Blob([patched], {type:'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const base = file.name.replace(/\.(html?|htm)$/i,'');
+      a.href = url; a.download = `${base}-patched.html`; a.click(); URL.revokeObjectURL(url);
+      toast(t('fileUpdated'),'ok');
+    } catch(err){ toast(t('errorPrefix') + err.message, 'err'); }
+  };
+  input.click();
+}
+
+function installFromCode(){
+  const newFunc = $('genCode').value;
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.html,.htm';
+  input.onchange = async (e) => {
+    const file = e.target.files[0]; if(!file) return;
+    try {
+      const content = await file.text();
+      const patched = replaceExportWordFunction(content, newFunc);
+      if(patched === null){ toast(t('exportWordNotFound'),'err'); return; }
+      const blob = new Blob([patched], {type:'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const base = file.name.replace(/\.(html?|htm)$/i,'');
+      a.href = url; a.download = `${base}-patched.html`; a.click(); URL.revokeObjectURL(url);
+      toast(t('fileUpdated'),'ok'); closeModal('codeModal');
+    } catch(err){ toast(t('errorPrefix') + err.message, 'err'); }
+  };
+  input.click();
+}
+
+function replaceExportWordFunction(html, newFunctionCode){
+  const startMarker = 'function exportWord', start = html.indexOf(startMarker);
+  if(start === -1) return null;
+  let i = html.indexOf('{', start); if(i === -1) return null;
+  let depth = 1; i++; let inString = null, inEscape = false, inTemplate = false;
+  while(i < html.length){
+    const c = html[i];
+    if((inString || inTemplate) && inEscape){ inEscape = false; i++; continue; }
+    if((inString || inTemplate) && c === '\\'){ inEscape = true; i++; continue; }
+    if(inString){ if(c === inString) inString = null; i++; continue; }
+    if(inTemplate){
+      if(c === '`'){ inTemplate = false; i++; continue; }
+      if(c === '$' && html[i+1] === '{'){
+        i += 2; let exprDepth = 1;
+        while(i < html.length && exprDepth > 0){
+          const ec = html[i];
+          if(ec === '\\'){ i += 2; continue; }
+          if(ec === "'" || ec === '"' || ec === '`'){
+            const q = ec; i++;
+            while(i < html.length){
+              if(html[i] === '\\'){ i += 2; continue; }
+              if(html[i] === q){ i++; break; }
+              i++;
+            }
+            continue;
+          }
+          if(ec === '{') exprDepth++; else if(ec === '}') exprDepth--;
+          i++;
+        }
+        continue;
+      }
+      i++; continue;
+    }
+    if(c === "'" || c === '"'){ inString = c; i++; continue; }
+    if(c === '`'){ inTemplate = true; i++; continue; }
+    if(c === '/' && html[i+1] === '/'){ while(i < html.length && html[i] !== '\n') i++; continue; }
+    if(c === '/' && html[i+1] === '*'){ i += 2; while(i < html.length-1 && !(html[i] === '*' && html[i+1] === '/')) i++; i += 2; continue; }
+    if(c === '{') depth++;
+    else if(c === '}'){ depth--; if(depth === 0) return html.substring(0, start) + newFunctionCode + html.substring(i + 1); }
+    i++;
+  }
+  return null;
+}
+
+function openModal(id){ $(id).classList.add('open'); }
+function closeModal(id){ $(id).classList.remove('open'); }
+function toast(msg, type='ok'){
+  const el = $('toast'); el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(el._timer); el._timer = setTimeout(()=>{ el.classList.remove('show'); }, 2600);
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); });
+document.querySelectorAll('.modal').forEach(m => { m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); }); });
+
+init();
+</script>
+</body>
+</html>
