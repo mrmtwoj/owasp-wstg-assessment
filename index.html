@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OWASP WSTG Assessment</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --blue-900:#0a2540;--blue-800:#0d2e54;--blue-700:#0f3b6e;--blue-600:#1657a3;
@@ -19,14 +18,12 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
-body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh Arabic',Tahoma,sans-serif;background:linear-gradient(135deg,#f4f8fe,#e8f1fc);color:var(--gray-800);line-height:1.6;overflow:hidden}
+body{font-family:Tahoma, Arial, sans-serif;background:linear-gradient(135deg,#f4f8fe,#e8f1fc);color:var(--gray-800);line-height:1.6;overflow:hidden}
 [dir="rtl"] .flip{transform:scaleX(-1)}
 
-/* Layout */
 .app{display:grid;grid-template-columns:340px 1fr;height:100vh}
 .app.hidden{display:none}
 
-/* ═══ Setup overlay ═══ */
 .setup-overlay{position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#0a2540,#0f3b6e 50%,#1657a3);display:grid;place-items:center;padding:20px;overflow-y:auto}
 .setup-overlay.hidden{display:none}
 .setup-overlay::before,.setup-overlay::after{content:'';position:absolute;border-radius:50%;pointer-events:none}
@@ -45,10 +42,9 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 .btn-block{width:100%;justify-content:center;padding:15px;font-size:1rem}
 .setup-load{margin-top:20px;text-align:center;padding-top:20px;border-top:1px solid var(--gray-200)}
 .setup-load>span{color:var(--gray-400);font-size:.85rem;display:block;margin-bottom:8px}
-.link-btn{background:none;border:none;color:var(--blue-600);font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.link-btn{background:none;border:none;color:var(--blue-600);font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px;margin:0 4px}
 .link-btn:hover{color:var(--orange-600)}
 
-/* Lang selector */
 .lang-switcher{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 10px;z-index:2}
 .lang-switcher select{background:transparent;border:none;color:white;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;outline:none;padding:0}
 .lang-switcher select option{color:var(--gray-800);background:white}
@@ -56,7 +52,6 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 .about-btn-start{background:none;border:none;color:rgba(255,255,255,.7);font-family:inherit;font-size:.8rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:14px;display:inline-block}
 .about-btn-start:hover{color:var(--orange-400)}
 
-/* ═══ Sidebar ═══ */
 .sidebar{background:linear-gradient(180deg,var(--blue-900),var(--blue-800));color:var(--white);display:flex;flex-direction:column;overflow:hidden;position:relative}
 .sidebar::before{content:'';position:absolute;top:-120px;right:-120px;width:300px;height:300px;background:radial-gradient(circle,rgba(249,115,22,.15),transparent 70%);border-radius:50%;pointer-events:none}
 .sidebar-header{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);position:relative}
@@ -109,7 +104,6 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 .sidebar-footer a{color:var(--orange-400);text-decoration:none}
 .sidebar-footer a:hover{text-decoration:underline}
 
-/* ═══ Main ═══ */
 .main{display:flex;flex-direction:column;overflow:hidden;background:var(--white)}
 .topbar{padding:14px 32px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;background:var(--white);flex-shrink:0;gap:12px;flex-wrap:wrap}
 .breadcrumb{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--gray-600);flex-wrap:wrap}
@@ -185,9 +179,14 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 .poc-item img{width:100%;height:110px;object-fit:cover;display:block}
 .poc-label{position:absolute;bottom:0;left:0;right:0;background:rgba(10,37,64,.8);color:white;font-size:.68rem;padding:3px 6px;text-align:center}
 .poc-remove{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,.9);color:white;border:none;cursor:pointer;font-size:.75rem;display:grid;place-items:center}
+.poc-url-input{width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--r-md);font-family:inherit;font-size:.9rem;margin-top:12px;background:var(--gray-50)}
+.poc-url-input:focus{outline:none;border-color:var(--blue-500);background:white;box-shadow:0 0 0 4px rgba(30,111,217,.1)}
 
-.notes-textarea{width:100%;padding:12px 16px;border:2px solid var(--gray-200);border-radius:var(--r-md);font-family:inherit;font-size:.9rem;resize:vertical;min-height:90px;transition:all .2s;background:var(--gray-50)}
-.notes-textarea:focus{outline:none;border-color:var(--blue-500);background:white;box-shadow:0 0 0 4px rgba(30,111,217,.1)}
+.editor-toolbar{display:flex;gap:5px;margin-bottom:8px;background:var(--gray-100);padding:6px;border-radius:var(--r-sm);border:1px solid var(--gray-200)}
+.editor-btn{padding:5px 10px;background:var(--white);border:1px solid var(--gray-300);border-radius:4px;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:600;color:var(--gray-600);transition:all .2s}
+.editor-btn:hover{background:var(--blue-50);border-color:var(--blue-400);color:var(--blue-600)}
+.editor-area{min-height:120px;padding:12px 16px;border:2px solid var(--gray-200);border-radius:var(--r-md);background:var(--gray-50);overflow-y:auto;font-size:.9rem;line-height:1.8;outline:none}
+.editor-area:focus{border-color:var(--blue-500);background:white;box-shadow:0 0 0 4px rgba(30,111,217,.1)}
 
 .footer{padding:16px 32px;border-top:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;background:var(--white);flex-shrink:0;gap:16px}
 .nav-buttons{display:flex;gap:10px}
@@ -201,7 +200,6 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 .counter strong{color:var(--blue-600);font-weight:700}
 .counter-divider{margin:0 4px;color:var(--gray-400)}
 
-/* ═══ About modal ═══ */
 .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(10,37,64,.6);display:none;place-items:center;padding:20px;backdrop-filter:blur(4px)}
 .modal-overlay.show{display:grid}
 .about-modal{background:white;border-radius:var(--r-lg);padding:36px;max-width:560px;width:100%;box-shadow:var(--sh-xl);animation:slideIn .3s ease;max-height:90vh;overflow-y:auto}
@@ -220,7 +218,6 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast.success{background:var(--green-500)}
 .toast.error{background:var(--red-500)}
-/* ═══ Sidebar search & collapsible ═══ */
 .sidebar-search{padding:10px 12px 6px}
 .search-input{width:100%;padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-sm);color:white;font-family:inherit;font-size:.78rem;outline:none;transition:all .2s}
 .search-input::placeholder{color:rgba(255,255,255,.4)}
@@ -246,7 +243,6 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 </head>
 <body>
 
-<!-- ═══ Setup ═══ -->
 <div class="setup-overlay" id="setupOverlay">
     <div class="setup-card">
         <div class="lang-switcher">
@@ -263,6 +259,15 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
         <div class="setup-logo">W</div>
         <h1 class="setup-title" data-i18n="setupTitle">شروع ارزیابی جدید</h1>
         <p class="setup-subtitle" data-i18n="setupSubtitle">اطلاعات سامانه مورد ارزیابی را وارد کنید</p>
+        
+        <div style="background:var(--blue-50); border:1px dashed var(--blue-400); padding:12px; border-radius:var(--r-md); text-align:center; margin-bottom:20px;">
+            <span style="font-size:.85rem; color:var(--gray-600); display:block; margin-bottom:8px;" data-i18n="loadChecklistHint">برای بارگذاری چک‌لیست اصلی، فایل JSON خود را انتخاب کنید:</span>
+            <button type="button" class="btn btn-secondary" id="setupLoadChecklistBtn" style="width:100%; justify-content:center;">
+                📋 <span data-i18n="loadChecklistBtn">انتخاب فایل JSON چک‌لیست</span>
+            </button>
+            <input type="file" id="checklistLoader" accept=".json" style="display:none">
+        </div>
+
         <form id="setupForm">
             <div class="form-group">
                 <label><span data-i18n="systemName">نام سامانه</span> <span class="req">*</span></label>
@@ -291,7 +296,6 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
     </div>
 </div>
 
-<!-- ═══ App ═══ -->
 <div class="app hidden" id="app">
     <aside class="sidebar">
         <div class="sidebar-header">
@@ -362,6 +366,14 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 					</svg>
 					<span class="tooltip" data-i18n="exportWord">خروجی Word</span>
 				</button>
+				<a href="editor_poc.html" target="_blank" class="btn-icon" title="Editor">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+						<line x1="3" y1="9" x2="21" y2="9"/>
+						<line x1="9" y1="21" x2="9" y2="9"/>
+					</svg>
+					<span class="tooltip" data-i18n="editor">ویرایشگر Word</span>
+				</a>
                 <button class="btn-icon primary" id="saveBtn" title="Save">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     <span class="tooltip" data-i18n="save">ذخیره ارزیابی</span>
@@ -404,7 +416,6 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 
 <input type="file" id="fileLoader" accept=".json" style="display:none">
 
-<!-- About modal -->
 <div class="modal-overlay" id="aboutModal">
     <div class="about-modal" style="position:relative;">
         <button class="about-close" id="aboutClose">✕</button>
@@ -422,12 +433,9 @@ body{font-family:'Vazirmatn','Noto Sans SC','Noto Sans Devanagari','Noto Naskh A
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   i18n
-   ═══════════════════════════════════════════════════════════ */
 const LANG_ORDER = ['fa','en','zh','ru','la','hi','ar'];
 const RTL_LANGS = ['fa','ar'];
-const LANG_NAMES = { fa:'فارسی', en:'English', zh:'中文', ru:'Русский', la:'Latina', hi:'हिन्दी', ar:'العربية' };
+const LANG_NAMES = { fa:'فارسی', en:'English', zh:'中文', ru:'Русский', la:'Latina', hi:'هندی', ar:'العربية' };
 
 const I18N = {
   fa: {
@@ -438,22 +446,28 @@ const I18N = {
     overallProgress: 'پیشرفت کلی', pass: 'قبول', fail: 'رد', pending: 'در انتظار',
     madeBy: 'ساخته شده توسط MR.MTwoJ', description: 'شرح آسیب‌پذیری', objectives: 'اهداف آزمون',
     remediation: 'روش رفع (Remediation)', payloads: 'پیلود و روش ارزیابی', severity: 'سطح شدت',
-    status: 'وضعیت ارزیابی', poc: 'تصاویر POC (درخواست/پاسخ)', notes: 'یادداشت‌ها',
+    status: 'وضعیت ارزیابی', poc: 'تصاویر POC (درخواست/پاسخ)', notes: 'سناریو اجرایی',
     notStarted: 'شروع‌نشده', na: 'بی‌ربط', critical: 'بحرانی', high: 'خطرناک', medium: 'متوسط', low: 'کم',
     prev: 'قبلی', next: 'بعدی', save: 'ذخیره ارزیابی', load: 'بارگذاری', editMeta: 'ویرایش اطلاعات',
     reset: 'شروع مجدد', test: 'تست', of: 'از', aboutTitle: 'درباره سازنده',
     pocUploadHint: 'برای افزودن تصویر کلیک کنید یا فایل را اینجا رها کنید',
     pocHint: 'PNG، JPG — به‌صورت Base64 ذخیره می‌شود',
-    notesPh: 'مشاهدات، شواهد، و توضیحات خود را اینجا ثبت کنید...',
+    pocUrlLabel: 'آدرس/URL اختصاصی POC:',
+    pocUrlPh: 'https://example.com/poc',
+    notesPh: 'توضیحات مربوط به سناریوی اجرایی را وارد کنید...',
     resetConfirm: 'آیا از شروع مجدد مطمئن هستید؟ تمام پیشرفت پاک خواهد شد.',
     savedToast: '✓ فایل ارزیابی دانلود شد', loadedToast: '✓ ارزیابی بارگذاری شد',
     resetToast: '✓ ارزیابی از نو شروع شد', imageAdded: '✓ تصویر اضافه شد',
     fillAll: 'لطفاً همه فیلدها را تکمیل کنید', updated: '✓ اطلاعات به‌روزرسانی شد', started: '✓ ارزیابی آغاز شد',
     exportWord: 'خروجی Word', searchPh: '🔍 جستجو در تست‌ها...', wordToast: '✓ فایل Word دانلود شد',
     wordNoMeta: 'اطلاعات ارزیابی موجود نیست', noFailed: 'هیچ آسیب‌پذیری رد شده‌ای برای خروجی وجود ندارد.',
+    loadChecklistHint: 'برای بارگذاری چک‌لیست اصلی، فایل JSON خود را انتخاب کنید:', loadChecklistBtn: 'انتخاب فایل JSON چک‌لیست',
+    checklistLoaded: '✓ چک‌لیست با موفقیت بارگذاری شد',
+    checklistError: 'خطا در خواندن فایل چک‌لیست. ساختار JSON معتبر نیست.',
     bio1: 'من محمد جواد جوشنی (با نام مستعار MR.MTwoJ) هستم. متولد ۱۳۷۱ در تهران، ایران. در حوزه فناوری اطلاعات فعالیت می‌کنم و بر امنیت سایبری، سیستم‌ها و توسعه نرم‌افزار تمرکز دارم.',
     bio2: 'علاقه زیادی به امنیت سایبری و برنامه‌نویسی سطح پایین دارم. حوزه‌های اصلی تمرکز من شامل توسعه اکسپلویت، پژوهش آسیب‌پذیری و درک نحوه کار داخلی نرم‌افزارها و سیستم‌عامل‌ها است.',
     bio3: 'در کنار پژوهش امنیتی، با فناوری‌های وب، سرورهای لینوکس و شبکه نیز کار می‌کنم. امنیت سایبری برای من نه تنها یک حرفه، بلکه یک اشتیاق بلندمدت است.',
+	editor: 'ویرایشگر Word',
   },
   en: {
     setupTitle: 'Start New Assessment', setupSubtitle: 'Enter the target system information',
@@ -463,40 +477,50 @@ const I18N = {
     overallProgress: 'Overall Progress', pass: 'Pass', fail: 'Fail', pending: 'Pending',
     madeBy: 'Made by MR.MTwoJ', description: 'Vulnerability Description', objectives: 'Test Objectives',
     remediation: 'Remediation', payloads: 'Payload & Test Method', severity: 'Severity Level',
-    status: 'Assessment Status', poc: 'POC Images (Request/Response)', notes: 'Notes',
+    status: 'Assessment Status', poc: 'POC Images (Request/Response)', notes: 'Exploit Scenario',
     notStarted: 'Not Started', na: 'N/A', critical: 'Critical', high: 'High', medium: 'Medium', low: 'Low',
     prev: 'Previous', next: 'Next', save: 'Save Assessment', load: 'Load', editMeta: 'Edit Info',
     reset: 'Reset', test: 'Test', of: 'of', aboutTitle: 'About the Author',
     pocUploadHint: 'Click to add image or drop file here', pocHint: 'PNG, JPG — stored as Base64',
-    notesPh: 'Record your observations, evidence, and notes here...', resetConfirm: 'Are you sure? All progress will be cleared.',
+    pocUrlLabel: 'POC Specific URL:', pocUrlPh: 'https://example.com/poc',
+    notesPh: 'Enter exploit scenario description here...', resetConfirm: 'Are you sure? All progress will be cleared.',
     savedToast: '✓ Assessment file downloaded', loadedToast: '✓ Assessment loaded',
     resetToast: '✓ Assessment restarted', imageAdded: '✓ Image added',
     fillAll: 'Please fill all fields', updated: '✓ Information updated', started: '✓ Assessment started',
     exportWord: 'Export Word', searchPh: '🔍 Search tests...', wordToast: '✓ Word file downloaded',
     wordNoMeta: 'No assessment data', noFailed: 'No failed vulnerabilities to export.',
+    loadChecklistHint: 'To load the main checklist, select your JSON file:', loadChecklistBtn: 'Select Checklist JSON',
+    checklistLoaded: '✓ Checklist loaded successfully',
+    checklistError: 'Error reading checklist file. Invalid JSON structure.',
     bio1: 'My name is Mohammad Javad Joshani (known as MR.MTwoJ). I was born in 1992 in Tehran, Iran. I work in the field of Information Technology and focus on areas related to cybersecurity, systems, and software development.',
     bio2: 'I have a strong interest in cybersecurity and low-level programming. My main areas of focus include exploit development, vulnerability research, and understanding how software and operating systems work internally.',
     bio3: 'Alongside security research, I also work with web technologies, Linux servers, and networking. Cybersecurity for me is not only a profession but also a long-term passion.',
+	editor: 'Word Editor',
   },
   zh: {
-    setupTitle: '开始新评估', setupSubtitle: '输入目标系统信息', systemName: '系统名称', systemNamePh: '例如：客户门户', url: 'URL 地址', version: '评估版本', start: '开始评估', orLoadFile: '或者如果您有已保存的评估', loadFileBtn: '📂 加载评估文件', aboutUs: '关于我们', appTitle: 'OWASP 安全评估', versionLabel: '版本：', overallProgress: '总体进度', pass: '通过', fail: '失败', pending: '待处理', madeBy: 'MR.MTwoJ 制作', description: '漏洞描述', objectives: '测试目标', remediation: '修复方法', payloads: '负载和测试方法', severity: '严重程度', status: '评估状态', poc: 'POC 图片（请求/响应）', notes: '备注', notStarted: '未开始', na: '不适用', critical: '严重', high: '高危', medium: '中危', low: '低危', prev: '上一个', next: '下一个', save: '保存评估', load: '加载', editMeta: '编辑信息', reset: '重置', test: '测试', of: '/', aboutTitle: '关于作者', pocUploadHint: '点击添加图片或将文件拖到此处', pocHint: 'PNG、JPG — 以 Base64 存储', notesPh: '在此记录您的观察、证据和笔记...', resetConfirm: '确定吗？所有进度将被清除。', savedToast: '✓ 评估文件已下载', loadedToast: '✓ 评估已加载', resetToast: '✓ 评估已重新开始', imageAdded: '✓ 图片已添加', fillAll: '请填写所有字段', updated: '✓ 信息已更新', started: '✓ 评估已开始', exportWord: '导出 Word', searchPh: '🔍 搜索测试...', wordToast: '✓ Word 文件已下载', wordNoMeta: '无评估数据', noFailed: '没有失败的漏洞可导出。',
+    setupTitle: '开始新评估', setupSubtitle: '输入目标系统信息', systemName: '系统名称', systemNamePh: '例如：客户门户', url: 'URL 地址', version: '评估版本', start: '开始评估', orLoadFile: '或者如果您有已保存的评估', loadFileBtn: '📂 加载评估文件', aboutUs: '关于我们', appTitle: 'OWASP 安全评估', versionLabel: '版本：', overallProgress: '总体进度', pass: '通过', fail: '失败', pending: '待处理', madeBy: 'MR.MTwoJ 制作', description: '漏洞描述', objectives: '测试目标', remediation: '修复方法', payloads: '负载和测试方法', severity: '严重程度', status: '评估状态', poc: 'POC 图片（请求/响应）', notes: '利用场景', notStarted: '未开始', na: '不适用', critical: '严重', high: '高危', medium: '中危', low: '低危', prev: '上一个', next: '下一个', save: '保存评估', load: '加载', editMeta: '编辑信息', reset: '重置', test: '测试', of: '/', aboutTitle: '关于作者', pocUploadHint: '点击添加图片或将文件拖到此处', pocHint: 'PNG、JPG — 以 Base64 存储', pocUrlLabel: 'POC 专属 URL：', pocUrlPh: 'https://example.com/poc', notesPh: '在此处输入利用场景描述...', resetConfirm: '确定吗？所有进度将被清除。', savedToast: '✓ 评估文件已下载', loadedToast: '✓ 评估已加载', resetToast: '✓ 评估已重新开始', imageAdded: '✓ 图片已添加', fillAll: '请填写所有字段', updated: '✓ 信息已更新', started: '✓ 评估已开始', exportWord: '导出 Word', searchPh: '🔍 搜索测试...', wordToast: '✓ Word 文件已下载', wordNoMeta: '无评估数据', noFailed: '没有失败的漏洞可导出。', loadChecklistHint: '要加载主检查清单，请选择您的 JSON 文件：', loadChecklistBtn: '选择检查清单 JSON', checklistLoaded: '✓ 检查清单加载成功', checklistError: '读取检查清单文件时出错。JSON 结构无效。',
     bio1: '我叫 Mohammad Javad Joshani（代号 MR.MTwoJ）。1992 年出生于伊朗德黑兰。从事信息技术领域工作，专注于网络安全、系统和软件开发。', bio2: '我对网络安全和底层编程有浓厚兴趣。主要关注领域包括漏洞利用开发、漏洞研究以及理解软件和操作系统的内部工作原理。', bio3: '除了安全研究，我还从事 Web 技术、Linux 服务器和网络方面的工作。网络安全对我来说不仅是一种职业，更是一种长期的热情。',
+	editor: 'Word 编辑器',
   },
   ru: {
-    setupTitle: 'Начать новую оценку', setupSubtitle: 'Введите информацию о системе', systemName: 'Имя системы', systemNamePh: 'напр.: Портал клиентов', url: 'URL адрес', version: 'Версия оценки', start: 'Начать оценку', orLoadFile: 'Или если у вас есть сохранённая оценка', loadFileBtn: '📂 Загрузить файл оценки', aboutUs: 'О нас', appTitle: 'Оценка безопасности OWASP', versionLabel: 'Версия:', overallProgress: 'Общий прогресс', pass: 'Пройдено', fail: 'Провалено', pending: 'В ожидании', madeBy: 'Создано MR.MTwoJ', description: 'Описание уязвимости', objectives: 'Цели теста', remediation: 'Метод исправления', payloads: 'Полезная нагрузка и метод тестирования', severity: 'Уровень серьёзности', status: 'Статус оценки', poc: 'Изображения POC (Запрос/Ответ)', notes: 'Заметки', notStarted: 'Не начато', na: 'Не применимо', critical: 'Критический', high: 'Высокий', medium: 'Средний', low: 'Низкий', prev: 'Назад', next: 'Далее', save: 'Сохранить оценку', load: 'Загрузить', editMeta: 'Редактировать', reset: 'Сброс', test: 'Тест', of: 'из', aboutTitle: 'Об авторе', pocUploadHint: 'Нажмите чтобы добавить изображение', pocHint: 'PNG, JPG — хранится в Base64', notesPh: 'Запишите здесь свои наблюдения...', resetConfirm: 'Вы уверены? Весь прогресс будет удалён.', savedToast: '✓ Файл оценки загружен', loadedToast: '✓ Оценка загружена', resetToast: '✓ Оценка перезапущена', imageAdded: '✓ Изображение добавлено', fillAll: 'Заполните все поля', updated: '✓ Информация обновлена', started: '✓ Оценка начата', exportWord: 'Экспорт Word', searchPh: '🔍 Поиск тестов...', wordToast: '✓ Файл Word загружен', wordNoMeta: 'Нет данных оценки', noFailed: 'Нет проваленных уязвимостей для экспорта.',
+    setupTitle: 'Начать новую оценку', setupSubtitle: 'Введите информацию о системе', systemName: 'Имя системы', systemNamePh: 'напр.: Портал клиентов', url: 'URL адрес', version: 'Версия оценки', start: 'Начать оценку', orLoadFile: 'Или если у вас есть сохранённая оценка', loadFileBtn: '📂 Загрузить файл оценки', aboutUs: 'О нас', appTitle: 'Оценка безопасности OWASP', versionLabel: 'Версия:', overallProgress: 'Общий прогресс', pass: 'Пройдено', fail: 'Провалено', pending: 'В ожидании', madeBy: 'Создано MR.MTwoJ', description: 'Описание уязвимости', objectives: 'Цели теста', remediation: 'Метод исправления', payloads: 'Полезная нагрузка и метод тестирования', severity: 'Уровень серьёзности', status: 'Статус оценки', poc: 'Изображения POC (Запрос/Ответ)', notes: 'Сценарий эксплуатации', notStarted: 'Не начато', na: 'Не применимо', critical: 'Критический', high: 'Высокий', medium: 'Средний', low: 'Низкий', prev: 'Назад', next: 'Далее', save: 'Сохранить оценку', load: 'Загрузить', editMeta: 'Редактировать', reset: 'Сброс', test: 'Тест', of: 'из', aboutTitle: 'Об авторе', pocUploadHint: 'Нажмите чтобы добавить изображение', pocHint: 'PNG, JPG — хранится в Base64', pocUrlLabel: 'Специфический URL POC:', pocUrlPh: 'https://example.com/poc', notesPh: 'Введите описание сценария эксплуатации...', resetConfirm: 'Вы уверены? Весь прогресс будет удалён.', savedToast: '✓ Файл оценки загружен', loadedToast: '✓ Оценка загружена', resetToast: '✓ Оценка перезапущена', imageAdded: '✓ Изображение добавлено', fillAll: 'Заполните все поля', updated: '✓ Информация обновлена', started: '✓ Оценка начата', exportWord: 'Экспорт Word', searchPh: '🔍 Поиск тестов...', wordToast: '✓ Файл Word загружен', wordNoMeta: 'Нет данных оценки', noFailed: 'Нет проваленных уязвимостей для экспорта.', loadChecklistHint: 'Чтобы загрузить основной чек-лист, выберите ваш JSON файл:', loadChecklistBtn: 'Выбрать JSON чек-листа', checklistLoaded: '✓ Чек-лист успешно загружен', checklistError: 'Ошибка чтения файла чек-листа. Неверная структура JSON.',
     bio1: 'Меня зовут Мохаммад Джавад Джошани (известен как MR.MTwoJ). Родился в 1992 году в Тегеране, Иран. Работаю в области информационных технологий и специализируюсь на кибербезопасности, системах и разработке ПО.', bio2: 'У меня большой интерес к кибербезопасности и низкоуровневому программированию. Основные направления — разработка эксплойтов, исследование уязвимостей и понимание внутренней работы ПО и ОС.', bio3: 'Помимо исследований безопасности, я работаю с веб-технологиями, серверами Linux и сетями. Кибербезопасность для меня — это не только профессия, но и долгосрочная страсть.',
+	editor: 'Редактор Word',
   },
   la: {
-    setupTitle: 'Incipere Novam Aestimationem', setupSubtitle: 'Inserere informationem systematis', systemName: 'Nomen Systematis', systemNamePh: 'ex.: Porta Clientium', url: 'Inscriptio URL', version: 'Versio Aestimationis', start: 'Incipere Aestimationem', orLoadFile: 'Vel si habes aestimationem servatam', loadFileBtn: '📂 Onerare Fasciculum', aboutUs: 'De Nobis', appTitle: 'Aestimatio Securitatis OWASP', versionLabel: 'Versio:', overallProgress: 'Progressus Generalis', pass: 'Transitus', fail: 'Defectus', pending: 'Pendens', madeBy: 'Factus a MR.MTwoJ', description: 'Descriptio Vulnerabilitatis', objectives: 'Scopos Examinationis', remediation: 'Methodus Correctionis', payloads: 'Onus et Methodus Examinationis', severity: 'Gradus Severitatis', status: 'Status Aestimationis', poc: 'Imagines POC', notes: 'Notae', notStarted: 'Non Inceptus', na: 'Non Applicabilis', critical: 'Criticus', high: 'Altus', medium: 'Medius', low: 'Humilis', prev: 'Prior', next: 'Posterior', save: 'Servare', load: 'Onerare', editMeta: 'Editare', reset: 'Renovare', test: 'Examen', of: 'ex', aboutTitle: 'De Auctore', pocUploadHint: 'Preme ut imaginem addas', pocHint: 'PNG, JPG — in Base64 servatur', notesPh: 'Scribe observationes tuas hic...', resetConfirm: 'Certusne es? Omnis progressus delebitur.', savedToast: '✓ Fasciculus servatus est', loadedToast: '✓ Aestimatio onerata est', resetToast: '✓ Aestimatio renovata est', imageAdded: '✓ Imago addita est', fillAll: 'Omnia campi complenda sunt', updated: '✓ Informationem renovata est', started: '✓ Aestimatio incepta est', exportWord: 'Export Word', searchPh: '🔍 Search tests...', wordToast: '✓ Word file downloaded', wordNoMeta: 'Nulla notitia', noFailed: 'Nulla vulnerabilitates defecerunt.',
+    setupTitle: 'Incipere Novam Aestimationem', setupSubtitle: 'Inserere informationem systematis', systemName: 'Nomen Systematis', systemNamePh: 'ex.: Porta Clientium', url: 'Inscriptio URL', version: 'Versio Aestimationis', start: 'Incipere Aestimationem', orLoadFile: 'Vel si habes aestimationem servatam', loadFileBtn: '📂 Onerare Fasciculum', aboutUs: 'De Nobis', appTitle: 'Aestimatio Securitatis OWASP', versionLabel: 'Versio:', overallProgress: 'Progressus Generalis', pass: 'Transitus', fail: 'Defectus', pending: 'Pendens', madeBy: 'Factus a MR.MTwoJ', description: 'Descriptio Vulnerabilitatis', objectives: 'Scopos Examinationis', remediation: 'Methodus Correctionis', payloads: 'Onus et Methodus Examinationis', severity: 'Gradus Severitatis', status: 'Status Aestimationis', poc: 'Imagines POC', notes: 'Scenarium Executionis', notStarted: 'Non Inceptus', na: 'Non Applicabilis', critical: 'Criticus', high: 'Altus', medium: 'Medius', low: 'Humilis', prev: 'Prior', next: 'Posterior', save: 'Servare', load: 'Onerare', editMeta: 'Editare', reset: 'Renovare', test: 'Examen', of: 'ex', aboutTitle: 'De Auctore', pocUploadHint: 'Preme ut imaginem addas', pocHint: 'PNG, JPG — in Base64 servatur', pocUrlLabel: 'URL POC Specificus:', pocUrlPh: 'https://example.com/poc', notesPh: 'Scribe scenarium executionis hic...', resetConfirm: 'Certusne es? Omnis progressus delebitur.', savedToast: '✓ Fasciculus servatus est', loadedToast: '✓ Aestimatio onerata est', resetToast: '✓ Aestimatio renovata est', imageAdded: '✓ Imago addita est', fillAll: 'Omnia campi complenda sunt', updated: '✓ Informationem renovata est', started: '✓ Aestimatio incepta est', exportWord: 'Export Word', searchPh: '🔍 Search tests...', wordToast: '✓ Word file downloaded', wordNoMeta: 'Nulla notitia', noFailed: 'Nulla vulnerabilitates defecerunt.', loadChecklistHint: 'Ad onerare principale checklist, selige fasciculum JSON tuum:', loadChecklistBtn: 'Selige JSON Checklist', checklistLoaded: '✓ Checklist onerata est', checklistError: 'Error legendi fasciculi checklist. Structura JSON invalida.',
     bio1: 'Nomen mihi est Mohammad Javad Joshani (cognomine MR.MTwoJ). Natus sum anno MCMXCII Teherani in Irania. In campo Technologiae Informationis operor, in cybersecuritate, systematibus et evolutione programmatum.', bio2: 'Magnum studium habeo in cybersecuritate et programmatione inferioris gradus. Meae areae principales sunt evolutio exploit, investigatio vulnerabilitatum et intellectus operis interni programmatum et systematum operandorum.', bio3: 'Praeter investigationem securitatis, etiam cum technologiis interretialibus, servitoribus Linux et retibus operor. Cybersecuritas mihi non solum professio, sed etiam studium diuturnum est.',
+	editor: 'Editor Word',
   },
   hi: {
-    setupTitle: 'नया मूल्यांकन शुरू करें', setupSubtitle: 'लक्ष्य प्रणाली की जानकारी दर्ज करें', systemName: 'सिस्टम नाम', systemNamePh: 'उदा.: ग्राहक पोर्टल', url: 'URL पता', version: 'मूल्यांकन संस्करण', start: 'मूल्यांकन शुरू करें', orLoadFile: 'या यदि आपके पास सहेजा गया मूल्यांकन है', loadFileBtn: '📂 फ़ाइल लोड करें', aboutUs: 'हमारे बारे में', appTitle: 'OWASP सुरक्षा मूल्यांकन', versionLabel: 'संस्करण:', overallProgress: 'कुल प्रगति', pass: 'उत्तीर्ण', fail: 'विफल', pending: 'लंबित', madeBy: 'MR.MTwoJ द्वारा निर्मित', description: 'भेद्यता विवरण', objectives: 'परीक्षण उद्देश्य', remediation: 'उपचार विधि', payloads: 'पेलोड और परीक्षण विधि', severity: 'गंभीरता स्तर', status: 'मूल्यांकन स्थिति', poc: 'POC चित्र', notes: 'टिप्पणियाँ', notStarted: 'शुरू नहीं हुआ', na: 'लागू नहीं', critical: 'गंभीर', high: 'उच्च', medium: 'मध्यम', low: 'निम्न', prev: 'पिछला', next: 'अगला', save: 'सहेजें', load: 'लोड करें', editMeta: 'जानकारी संपादित करें', reset: 'रीसेट', test: 'परीक्षण', of: 'में से', aboutTitle: 'लेखक के बारे में', pocUploadHint: 'चित्र जोड़ने के लिए क्लिक करें', pocHint: 'PNG, JPG — Base64 में संग्रहीत', notesPh: 'अपनी टिप्पणियाँ यहाँ दर्ज करें...', resetConfirm: 'क्या आप सुनिश्चित हैं? सारी प्रगति मिटा दी जाएगी।', savedToast: '✓ मूल्यांकन फ़ाइल डाउनलोड हुई', loadedToast: '✓ मूल्यांकन लोड हुआ', resetToast: '✓ मूल्यांकन पुनः आरंभ', imageAdded: '✓ चित्र जोड़ा गया', fillAll: 'कृपया सभी फ़ील्ड भरें', updated: '✓ जानकारी अपडेट हुई', started: '✓ मूल्यांकन शुरू', exportWord: 'Word निर्यात', searchPh: '🔍 परीक्षण खोजें...', wordToast: '✓ Word फ़ाइल डाउनलोड हुई', wordNoMeta: 'कोई डेटा नहीं', noFailed: 'निर्यात करने के लिए कोई विफल भेद्यता नहीं है।',
+    setupTitle: 'नया मूल्यांकन शुरू करें', setupSubtitle: 'लक्ष्य प्रणाली की जानकारी दर्ज करें', systemName: 'सिस्टम नाम', systemNamePh: 'उदा.: ग्राहक पोर्टल', url: 'URL पता', version: 'मूल्यांकन संस्करण', start: 'मूल्यांकन शुरू करें', orLoadFile: 'या यदि आपके पास सहेजा गया मूल्यांकन है', loadFileBtn: '📂 फ़ाइल लोड करें', aboutUs: 'हमारे बारे में', appTitle: 'OWASP सुरक्षा मूल्यांकन', versionLabel: 'संस्करण:', overallProgress: 'कुल प्रगति', pass: 'उत्तीर्ण', fail: 'विफल', pending: 'लंबित', madeBy: 'MR.MTwoJ द्वारा निर्मित', description: 'भेद्यता विवरण', objectives: 'परीक्षण उद्देश्य', remediation: 'उपचार विधि', payloads: 'पेलोड और परीक्षण विधि', severity: 'गंभीरता स्तर', status: 'मूल्यांकन स्थिति', poc: 'POC चित्र', notes: 'शोषण परिदृश्य', notStarted: 'शुरू नहीं हुआ', na: 'लागू नहीं', critical: 'गंभीर', high: 'उच्च', medium: 'मध्यम', low: 'निम्न', prev: 'पिछला', next: 'अगला', save: 'सहेजें', load: 'लोड करें', editMeta: 'जानकारी संपादित करें', reset: 'रीसेट', test: 'परीक्षण', of: 'में से', aboutTitle: 'लेखक के बारे में', pocUploadHint: 'चित्र जोड़ने के लिए क्लिक करें', pocHint: 'PNG, JPG — Base64 में संग्रहीत', pocUrlLabel: 'विशिष्ट POC URL:', pocUrlPh: 'https://example.com/poc', notesPh: 'यहाँ शोषण परिदृश्य विवरण दर्ज करें...', resetConfirm: 'क्या आप सुनिश्चित हैं? सारी प्रगति मिटा दी जाएगी।', savedToast: '✓ मूल्यांकन फ़ाइल डाउनलोड हुई', loadedToast: '✓ मूल्यांकन लोड हुआ', resetToast: '✓ मूल्यांकन पुनः आरंभ', imageAdded: '✓ चित्र जोड़ा गया', fillAll: 'कृपया सभी फ़ील्ड भरें', updated: '✓ जानकारी अपडेट हुई', started: '✓ मूल्यांकन शुरू', exportWord: 'Word निर्यात', searchPh: '🔍 परीक्षण खोजें...', wordToast: '✓ Word फ़ाइल डाउनलोड हुई', wordNoMeta: 'कोई डेटा नहीं', noFailed: 'निर्यात करने के लिए कोई विफल भेद्यता नहीं है।', loadChecklistHint: 'मुख्य चेकलिस्ट लोड करने के लिए, अपनी JSON फ़ाइल चुनें:', loadChecklistBtn: 'चेकलिस्ट JSON चुनें', checklistLoaded: '✓ चेकलिस्ट सफलतापूर्वक लोड हुई', checklistError: 'चेकलिस्ट फ़ाइल पढ़ने में त्रुटि। अमान्य JSON संरचना।',
     bio1: 'मेरा नाम मोहम्मद जवाद जोशनी (MR.MTwoJ) है। मेरा जन्म 1992 में तेहरान, ईरान में हुआ। मैं सूचना प्रौद्योगिकी के क्षेत्र में काम करता हूँ और साइबर सुरक्षा, सिस्टम और सॉफ़्टवेयर विकास पर ध्यान केंद्रित करता हूँ।', bio2: 'मुझे साइबर सुरक्षा और निम्न-स्तरीय प्रोग्रामिंग में गहरी रुचि है। मुख्य क्षेत्रों में एक्सप्लॉइट विकास, भेद्यता अनुसंधान और सॉफ़्टवेयर आंतरिक कार्यप्रणाली शामिल हैं।', bio3: 'सुरक्षा अनुसंधान के साथ-साथ मैं वेब तकनीक, Linux सर्वर और नेटवर्किंग पर भी काम करता हूँ। साइबर सुरक्षा मेरे लिए केवल पेशा नहीं, बल्कि दीर्घकालिक जुनून है।',
+	editor: 'Word संपादक',
   },
   ar: {
-    setupTitle: 'بدء تقييم جديد', setupSubtitle: 'أدخل معلومات النظام المستهدف', systemName: 'اسم النظام', systemNamePh: 'مثال: بوابة العملاء', url: 'عنوان URL', version: 'إصدار التقييم', start: 'بدء التقييم', orLoadFile: 'أو إذا كان لديك تقييم محفوظ', loadFileBtn: '📂 تحميل ملف التقييم', aboutUs: 'من نحن', appTitle: 'تقييم أمان OWASP', versionLabel: 'الإصدار:', overallProgress: 'التقدم الإجمالي', pass: 'نجح', fail: 'فشل', pending: 'قيد الانتظار', madeBy: 'صنع بواسطة MR.MTwoJ', description: 'وصف الثغرة', objectives: 'أهداف الاختبار', remediation: 'طريقة الإصلاح', payloads: 'الحمولة وطريقة الاختبار', severity: 'مستوى الخطورة', status: 'حالة التقييم', poc: 'صور POC (طلب/استجابة)', notes: 'ملاحظات', notStarted: 'لم يبدأ', na: 'غير قابل للتطبيق', critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض', prev: 'السابق', next: 'التالي', save: 'حفظ التقييم', load: 'تحميل', editMeta: 'تعديل المعلومات', reset: 'إعادة تعيين', test: 'اختبار', of: 'من', aboutTitle: 'عن المؤلف', pocUploadHint: 'انقر لإضافة صورة', pocHint: 'PNG, JPG — يُخزن بصيغة Base64', notesPh: 'سجّل ملاحظاتك هنا...', resetConfirm: 'هل أنت متأكد؟ سيتم مسح كل التقدم.', savedToast: '✓ تم تنزيل ملف التقييم', loadedToast: '✓ تم تحميل التقييم', resetToast: '✓ تم إعادة بدء التقييم', imageAdded: '✓ تمت إضافة الصورة', fillAll: 'يرجى ملء جميع الحقول', updated: '✓ تم تحديث المعلومات', started: '✓ بدأ التقييم', exportWord: 'تصدير Word', searchPh: '🔍 بحث في الاختبارات...', wordToast: '✓ تم تنزيل ملف Word', wordNoMeta: 'لا توجد بيانات', noFailed: 'لا توجد ثغرات فاشلة للتصدير.',
+    setupTitle: 'بدء تقييم جديد', setupSubtitle: 'أدخل معلومات النظام المستهدف', systemName: 'اسم النظام', systemNamePh: 'مثال: بوابة العملاء', url: 'عنوان URL', version: 'إصدار التقييم', start: 'بدء التقييم', orLoadFile: 'أو إذا كان لديك تقييم محفوظ', loadFileBtn: '📂 تحميل ملف التقييم', aboutUs: 'من نحن', appTitle: 'تقييم أمان OWASP', versionLabel: 'الإصدار:', overallProgress: 'التقدم الإجمالي', pass: 'نجح', fail: 'فشل', pending: 'قيد الانتظار', madeBy: 'صنع بواسطة MR.MTwoJ', description: 'وصف الثغرة', objectives: 'أهداف الاختبار', remediation: 'طريقة الإصلاح', payloads: 'الحمولة وطريقة الاختبار', severity: 'مستوى الخطورة', status: 'حالة التقييم', poc: 'صور POC (طلب/استجابة)', notes: 'سيناريو الاستغلال', notStarted: 'لم يبدأ', na: 'غير قابل للتطبيق', critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض', prev: 'السابق', next: 'التالي', save: 'حفظ التقييم', load: 'تحميل', editMeta: 'تعديل المعلومات', reset: 'إعادة تعيين', test: 'اختبار', of: 'من', aboutTitle: 'عن المؤلف', pocUploadHint: 'انقر لإضافة صورة', pocHint: 'PNG, JPG — يُخزن بصيغة Base64', pocUrlLabel: 'عنوان URL المخصص لـ POC:', pocUrlPh: 'https://example.com/poc', notesPh: 'أدخل وصف سيناريو الاستغلال هنا...', resetConfirm: 'هل أنت متأكد؟ سيتم مسح كل التقدم.', savedToast: '✓ تم تنزيل ملف التقييم', loadedToast: '✓ تم تحميل التقييم', resetToast: '✓ تم إعادة بدء التقييم', imageAdded: '✓ تمت إضافة الصورة', fillAll: 'يرجى ملء جميع الحقول', updated: '✓ تم تحديث المعلومات', started: '✓ بدأ التقييم', exportWord: 'تصدير Word', searchPh: '🔍 بحث في الاختبارات...', wordToast: '✓ تم تنزيل ملف Word', wordNoMeta: 'لا توجد بيانات', noFailed: 'لا توجد ثغرات فاشلة للتصدير.', loadChecklistHint: 'لتحميل قائمة التحقق الرئيسية، حدد ملف JSON الخاص بك:', loadChecklistBtn: 'تحديد ملف JSON لقائمة التحقق', checklistLoaded: '✓ تم تحميل قائمة التحقق بنجاح', checklistError: 'خطأ في قراءة ملف قائمة التحقق. هيكل JSON غير صالح.',
     bio1: 'اسمي محمد جواد جوشني (المعروف بـ MR.MTwoJ). ولدت عام 1992 في طهران، إيران. أعمل في مجال تكنولوجيا المعلومات وأركز على الأمن السيبراني والأنظمة وتطوير البرمجيات.', bio2: 'لدي اهتمام قوي بالأمن السيبراني والبرمجة منخفضة المستوى. تشمل مجالات تركيزي الرئيسية تطوير الاستغلال، وبحوث الثغرات، وفهم كيفية عمل البرمجيات وأنظمة التشغيل داخلياً.', bio3: 'إلى جانب بحوث الأمن، أعمل أيضاً مع تقنيات الويب وخوادم Linux والشبكات. الأمن السيبراني بالنسبة لي ليس مجرد مهنة، بل شغف طويل الأمد.',
+	editor: 'محرر Word',
   }
 };
 
@@ -536,13 +560,11 @@ function locArr(obj, base) {
     return obj[`${base}_${suffix}`] || obj[`${base}_en`] || obj[`${base}_fa`] || [];
 }
 
-/* ═══════════════════════════════════════════════════════════
-   App state
-   ═══════════════════════════════════════════════════════════ */
 const STORAGE_KEY_META = 'wstg_meta_v3';
 const STORAGE_KEY_DATA = 'wstg_assessment_v3';
 const SEVERITY_ICON = { critical:'🔴', high:'🟠', medium:'🟡', low:'🔵' };
 const SEVERITY_CLS = { critical:'badge-sev-critical', high:'badge-sev-high', medium:'badge-sev-medium', low:'badge-sev-low' };
+const SEV_COLORS_WORD = { critical:'#7c3aed', high:'#dc2626', medium:'#f97316', low:'#2563eb' };
 
 let checklistData = null;
 let flatTests = [];
@@ -550,22 +572,6 @@ let categoryMap = [];
 let currentIndex = 0;
 let expandedCats = {};
 let meta = null;
-
-/* ═══════════════════════════════════════════════════════════
-   Load checklist
-   ═══════════════════════════════════════════════════════════ */
-async function loadChecklist() {
-    try {
-        const res = await fetch('checklist.json');
-        if (!res.ok) throw new Error('HTTP '+res.status);
-        checklistData = await res.json();
-    } catch(e) {
-        console.warn('checklist.json بارگذاری نشد، استفاده از داده نمونه.', e);
-        checklistData = getSampleData();
-    }
-    buildFlatTests();
-    bootApp();
-}
 
 function getSampleData() {
     const cats = ['A01','A02','A03','A04','A05','A06','A07','A08','A09','A10'];
@@ -620,15 +626,13 @@ function buildFlatTests() {
                 categoryCat: cat,
                 severity: test.severity || 'medium',
                 poc_images: test.poc_images || [],
+                poc_url: test.poc_url || '',
                 status: 'not_started', notes: ''
             });
         });
     }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Boot
-   ═══════════════════════════════════════════════════════════ */
 function bootApp() {
     applyI18n();
     const savedMeta = loadMeta();
@@ -665,13 +669,10 @@ function renderSystemInfo() {
     document.getElementById('sysVersion').textContent = meta.version || '—';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Persist
-   ═══════════════════════════════════════════════════════════ */
 function saveMeta() { try { localStorage.setItem(STORAGE_KEY_META, JSON.stringify(meta)); } catch(e){} }
 function loadMeta() { try { const r = localStorage.getItem(STORAGE_KEY_META); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
 function saveProgress() {
-    const data = flatTests.map(t => ({ id:t.id, status:t.status, notes:t.notes, poc_images:t.poc_images, severity:t.severity }));
+    const data = flatTests.map(t => ({ id:t.id, status:t.status, notes:t.notes, poc_images:t.poc_images, poc_url:t.poc_url, severity:t.severity }));
     try { localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data)); } catch(e){}
 }
 function loadProgress() {
@@ -689,14 +690,12 @@ function applyResults(results) {
             t.status = r.status || 'not_started';
             t.notes = r.notes || '';
             t.poc_images = r.poc_images || t.poc_images || [];
+            t.poc_url = r.poc_url || '';
             if (r.severity) t.severity = r.severity;
         }
     });
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Render
-   ═══════════════════════════════════════════════════════════ */
 function catDisplayName(cat) {
     if (!cat) return '';
     return cat['name_'+currentLang] || cat.name_en || cat.name_fa || cat.id;
@@ -794,8 +793,27 @@ function renderTest() {
         ${rem ? `<div class="section"><div class="section-title">${t('remediation')}</div><div class="remediation-box">${escapeHtml(rem)}</div></div>` : ''}
         <div class="section"><div class="section-title">${t('severity')}</div><div class="severity-group">${['critical','high','medium','low'].map(s=>`<label class="severity-option"><input type="radio" name="severity" value="${s}" ${test.severity===s?'checked':''}><div class="severity-option-content"><div class="severity-icon">${SEVERITY_ICON[s]}</div><div class="severity-label">${t(s)}</div></div></label>`).join('')}</div></div>
         <div class="section"><div class="section-title">${t('status')}</div><div class="status-group">${[['not_started','⏳'],['pass','✓'],['fail','✕'],['na','—']].map(([v,i])=>`<label class="status-option"><input type="radio" name="status" value="${v}" ${test.status===v?'checked':''}><div class="status-option-content"><div class="status-icon">${i}</div><div class="status-label">${t(v==='not_started'?'notStarted':v)}</div></div></label>`).join('')}</div></div>
-        <div class="section"><div class="section-title">${t('poc')}</div><div class="poc-upload-area" id="pocUploadArea"><input type="file" id="pocInput" accept="image/*" multiple><div style="color:var(--gray-400);"><div style="font-size:1.8rem;margin-bottom:6px;">🖼️</div><div>${t('pocUploadHint')}</div><div style="font-size:.72rem;margin-top:4px;">${t('pocHint')}</div></div></div><div class="poc-grid" id="pocGrid"></div></div>
-        <div class="section"><div class="section-title">${t('notes')}</div><textarea class="notes-textarea" id="notesInput" placeholder="${escapeHtml(t('notesPh'))}">${escapeHtml(test.notes||'')}</textarea></div>
+        
+        <div class="section">
+            <div class="section-title">${t('poc')}</div>
+            <div class="poc-upload-area" id="pocUploadArea"><input type="file" id="pocInput" accept="image/*" multiple><div style="color:var(--gray-400);"><div style="font-size:1.8rem;margin-bottom:6px;">🖼️</div><div>${t('pocUploadHint')}</div><div style="font-size:.72rem;margin-top:4px;">${t('pocHint')}</div></div></div>
+            <div class="poc-grid" id="pocGrid"></div>
+            <div style="margin-top:12px;">
+                <label style="font-size:.85rem;font-weight:600;color:var(--gray-600);display:block;margin-bottom:4px;">${t('pocUrlLabel')}</label>
+                <input type="text" id="pocUrlInput" class="poc-url-input" dir="ltr" placeholder="${escapeHtml(t('pocUrlPh'))}" value="${escapeHtml(test.poc_url || '')}">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">${t('notes')}</div>
+            <div class="editor-toolbar">
+                <button type="button" class="editor-btn" onclick="document.execCommand('bold', false, null)"><b>B</b></button>
+                <button type="button" class="editor-btn" onclick="document.execCommand('italic', false, null)"><i>I</i></button>
+                <button type="button" class="editor-btn" onclick="document.execCommand('underline', false, null)"><u>U</u></button>
+                <button type="button" class="editor-btn" onclick="document.execCommand('insertUnorderedList', false, null)">• List</button>
+            </div>
+            <div id="notesEditor" class="editor-area" contenteditable="true">${test.notes || ''}</div>
+        </div>
     `;
 
     document.querySelectorAll('input[name="severity"]').forEach(inp => inp.addEventListener('change', e => {
@@ -809,7 +827,22 @@ function renderTest() {
         saveProgress();
         renderSidebar(); renderStats();
     }));
-    document.getElementById('notesInput').addEventListener('input', e => { test.notes = e.target.value; saveProgress(); });
+
+    const editor = document.getElementById('notesEditor');
+    editor.addEventListener('input', () => {
+        test.notes = editor.innerHTML;
+        saveProgress();
+    });
+    editor.addEventListener('blur', () => {
+        test.notes = editor.innerHTML;
+        saveProgress();
+    });
+
+    const pocUrlInput = document.getElementById('pocUrlInput');
+    pocUrlInput.addEventListener('input', e => {
+        test.poc_url = e.target.value;
+        saveProgress();
+    });
 
     const uploadArea = document.getElementById('pocUploadArea');
     const fileInput = document.getElementById('pocInput');
@@ -882,9 +915,6 @@ function render() {
     setTimeout(() => { const a = document.querySelector('.test-item.active'); if (a) a.scrollIntoView({block:'nearest',behavior:'smooth'}); }, 50);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Save/Load/Reset
-   ═══════════════════════════════════════════════════════════ */
 function downloadAssessment() {
     if (!meta) return;
     const data = {
@@ -893,7 +923,7 @@ function downloadAssessment() {
         results: flatTests.map(t => ({
             id: t.id, wstg_code: t.wstg_code || t.id, category: t.categoryId,
             name: t.name_en || t.name_fa, severity: t.severity,
-            status: t.status, notes: t.notes, poc_images: t.poc_images
+            status: t.status, notes: t.notes, poc_images: t.poc_images, poc_url: t.poc_url
         }))
     };
     const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
@@ -918,145 +948,83 @@ function importAssessment(file) {
     reader.readAsText(file);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Export Word (فقط موارد رد شده - هر کدام در یک صفحه)
-   ═══════════════════════════════════════════════════════════ */
 function exportWord() {
     if (!meta) { showToast(t('wordNoMeta'), 'error'); return; }
-
-    // فقط تست‌های با وضعیت fail
     const failedTests = flatTests.filter(t => t.status === 'fail');
-    if (!failedTests.length) {
-        showToast(t('noFailed'), 'error');
-        return;
-    }
+    if (!failedTests.length) { showToast(t('noFailed'), 'error'); return; }
 
-    const L = currentLang === 'fa' ? {
-        vulName: 'نام آسیب پذیری',
-        owaspTitle: 'عنوان متداول OWASP',
-        sensitiveErr: 'پیام خطای حاوی اطلاعات حساس',
-        severity: 'سطح شدت',
-        cweId: 'شناسه CWE',
-        address: 'آدرس آسیب پذیری',
-        description: 'شرح آسیب پذیری',
-        exploitScenario: 'توضیح آسیب پذیری سناریو اجرایی',
-        remediation: 'روش رفع آسیب پذیری',
-        objectives: 'اهداف آزمون',
-        pocs: 'مستندات تصویری',
-        autoFill: 'توسط خود ارزیاب تکمیل می گردد'
-    } : {
-        vulName: 'Vulnerability Name',
-        owaspTitle: 'OWASP Common Title',
-        sensitiveErr: 'Sensitive Error Message',
-        severity: 'Severity Level',
-        cweId: 'CWE ID',
-        address: 'Vulnerability Address',
-        description: 'Vulnerability Description',
-        exploitScenario: 'Exploit Scenario Description',
-        remediation: 'Remediation Method',
-        objectives: 'Test Objectives',
-        pocs: 'Visual Documentation',
-        autoFill: 'To be completed by the assessor'
-    };
+    const L = currentLang === 'fa' ? { vulName: 'نام آسیب پذیری', owaspTitle: 'عنوان متداول OWASP', sensitiveErr: 'پیام خطای حاوی اطلاعات حساس', severity: 'سطح شدت', cweId: 'شناسه CWE', address: 'آدرس آسیب پذیری', description: 'شرح آسیب پذیری', exploitScenario: 'توضیح آسیب پذیری سناریو اجرایی', remediation: 'روش رفع آسیب پذیری', objectives: 'اهداف آزمون', pocs: 'مستندات تصویری', autoFill: 'توسط خود ارزیاب تکمیل می گردد' } : { vulName: 'Vulnerability Name', owaspTitle: 'OWASP Common Title', sensitiveErr: 'Sensitive Error Message', severity: 'Severity Level', cweId: 'CWE ID', address: 'Vulnerability Address', description: 'Vulnerability Description', exploitScenario: 'Exploit Scenario Description', remediation: 'Remediation Method', objectives: 'Test Objectives', pocs: 'Visual Documentation', autoFill: 'To be completed by the assessor' };
 
-    let pages = failedTests.map(test => {
-        const catName = catDisplayName(test.categoryCat);
+    const PAGE_WRAP_START = '<div style="page-break-before:always; mso-break-type:page-break; mso-pagination:none;"><p style="margin:0;padding:0;height:0;line-height:0;font-size:1pt;color:#ffffff;">.</p>';
+    const PAGE_WRAP_END = '</div>';
+
+    let allPagesHtml = '';
+
+    allPagesHtml += `<div>
+<div style="text-align:center;margin-top:120px;"><h1 style="font-size:36px;color:#1e293b;">گزارش ارزیابی امنیتی</h1><p style="margin-top:20px;font-size:18px;">سامانه: ${meta.systemName}</p><p style="font-size:16px;">نسخه: ${meta.version}</p></div>
+</div>
+`;
+
+    // صفحه‌های تکراری - هر تست در یک صفحه مستقل
+    allPagesHtml += failedTests.map((test, index) => {
         const testName = loc(test, 'name') || test.id;
         const desc = loc(test, 'description') || '';
         const rem = loc(test, 'remediation') || '';
         const objectives = locArr(test, 'objectives').join('<br>');
-        
-        // استفاده از یادداشت ها برای سناریو اجرایی، اگر خالی بود متن پیش فرض
-        const notes = test.notes.trim() ? escapeHtml(test.notes).replace(/\n/g, '<br>') : `<span style="color:#666;">${L.autoFill}</span>`;
+        const notesHtml = test.notes.trim() ? test.notes : `<span style="color:#666;">${L.autoFill}</span>`;
+        let pocs = test.poc_images && test.poc_images.length > 0 ? test.poc_images.map(img => `<img src="${img.data}" width="800" height="800" style="max-width:100%;margin:5px;border:1px solid #ccc;" />`).join('') : '—';
+        const cweId = test.cwe_id || '209';
+        const address = test.poc_url || '';
+        const sevBg = SEV_COLORS_WORD[test.severity] || '#dc2626';
+        const sevText = t(test.severity);
 
-        // تصاویر
-        let pocs = '';
-        if (test.poc_images && test.poc_images.length > 0) {
-            pocs = test.poc_images.map(img => `<img src="${img.data}" style="max-width:100%; height:auto; margin:5px; border:1px solid #ccc;" />`).join('');
-        } else {
-            pocs = '—';
-        }
-
-        // رنگ سطح شدت
-        let sevColor = '#ef4444'; // قرمز برای High/Critical
-        if (test.severity === 'medium') sevColor = '#eab308'; // زرد
-        if (test.severity === 'low') sevColor = '#3b82f6'; // آبی
-
-        const cweId = test.cwe_id || '209'; // پیش فرض 209
-
-        return `
-        <div style="page-break-after: always;">
-            <table style="width:100%; border-collapse:collapse; font-family:Tahoma, Arial, sans-serif; font-size:12px; text-align:right; margin-bottom:20px;" border="1" dir="rtl">
-                <tr>
-                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${L.vulName}<br><br><span style="font-weight:normal;">${escapeHtml(testName)}</span></td>
-                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${L.owaspTitle}<br><br><span style="font-weight:normal;">${escapeHtml(test.wstg_code || test.id)}</span></td>
-                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${L.sensitiveErr}<br><br><span style="font-weight:normal;">&nbsp;</span></td>
-                    <td style="width:25%; padding:8px; font-weight:bold; text-align:center;">${test.categoryId} - ${escapeHtml(catName)}<br><br><span style="font-weight:normal;">&nbsp;</span></td>
-                </tr>
-                <tr>
-                    <td style="padding:8px; font-weight:bold; text-align:center;">${L.severity}<br><br><span style="font-weight:normal;">${t(test.severity)}</span></td>
-                    <td style="padding:8px; font-weight:bold; text-align:center;">${L.cweId}<br><br><span style="font-weight:normal;">${cweId}</span></td>
-                    <td style="padding:8px; background:${sevColor}; color:white; text-align:center; font-weight:bold; font-size:14px;">${t(test.severity)}</td>
-                    <td style="padding:8px; text-align:center; font-size:14px;">${cweId}</td>
-                </tr>
-                <tr>
-                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.address}</td>
-                    <td colspan="3" style="padding:8px; direction:ltr; text-align:left; font-family:monospace;">${escapeHtml(meta.url || '')}</td>
-                </tr>
-                <tr>
-                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.description}</td>
-                    <td colspan="3" style="padding:8px; line-height:1.6;">${escapeHtml(desc).replace(/\n/g, '<br>')}</td>
-                </tr>
-                <tr>
-                    <td style="padding:8px; font-weight:bold; text-align:right; width:25%;">${L.exploitScenario}</td>
-                    <td colspan="3" style="padding:8px; line-height:1.6; min-height:60px; text-align:center;">${notes}</td>
-                </tr>
-                <tr>
-                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.remediation}</td>
-                    <td colspan="3" style="padding:8px; line-height:1.6;">${escapeHtml(rem).replace(/\n/g, '<br>')}</td>
-                </tr>
-                <tr>
-                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.objectives}</td>
-                    <td colspan="3" style="padding:8px; line-height:1.6;">${objectives}</td>
-                </tr>
-                <tr>
-                    <td style="padding:8px; font-weight:bold; text-align:right;">${L.pocs}</td>
-                    <td colspan="3" style="padding:8px; text-align:center;">${pocs}</td>
-                </tr>
-            </table>
-        </div>
-        `;
+        return PAGE_WRAP_START + `
+<table style="width:100%;border-collapse:collapse;font-size:13px;" border="1">
+        <tbody>
+        <tr><td style="padding:8px;font-weight:bold;text-align:center;">${L.vulName}</td><td style="padding:8px;font-weight:bold;text-align:center;">${L.owaspTitle}</td><td style="padding:8px;font-weight:bold;text-align:center;">${L.severity}</td><td style="padding:8px;font-weight:bold;text-align:center;">${L.cweId}</td></tr>
+        <tr><td style="padding:8px;text-align:center;">${testName}</td><td style="padding:8px;text-align:center;">${test.wstg_code}</td><td style="padding:8px;text-align:center;background-color:${sevBg};color:#fff;font-weight:bold;">${sevText}</td><td style="padding:8px;text-align:center;">${cweId}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">${L.address}</td><td colspan="3" style="padding:8px;direction:ltr;text-align:left;">${address}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">${L.description}</td><td colspan="3" style="padding:8px;">${desc}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">${L.exploitScenario}</td><td colspan="3" style="padding:8px;">${notesHtml}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">${L.remediation}</td><td colspan="3" style="padding:8px;">${rem}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">${L.objectives}</td><td colspan="3" style="padding:8px;">${objectives}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;">${L.pocs}</td><td colspan="3" style="padding:8px;text-align:center;">${pocs}</td></tr>
+        </tbody></table>
+` + PAGE_WRAP_END;
     }).join('');
 
     const html = `<!DOCTYPE html>
     <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" dir="rtl">
     <head><meta charset="UTF-8"><title>WSTG Report</title>
+    <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
     <style>
-        @page { size: A4 portrait; margin: 1cm; }
+        @page { size: 21cm 29.7cm; margin: 2cm; mso-page-orientation: portrait; }
+        @page Section1 { size: 21cm 29.7cm; margin: 2cm; }
+        div.Section1 { page: Section1; }
         body { font-family: Tahoma, Arial, sans-serif; direction: rtl; margin: 0; padding: 0; }
-        table { width: 100%; border-collapse: collapse; }
-        td { border: 1px solid #000; }
+        table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+        td, th { border: 1px solid #000; padding: 6px; }
+        img { max-width: 100%; height: auto; page-break-inside: avoid; }
+        p { margin: 0; }
     </style>
     </head>
     <body>
-        ${pages}
+        ${allPagesHtml}
     </body>
     </html>`;
 
     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
+    const sysName = (meta.systemName || 'report').replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '-');
     a.href = url;
-    a.download = `wstg-report-${new Date().toISOString().slice(0,10)}.doc`;
+    a.download = `wstg-report-${sysName}-${new Date().toISOString().slice(0,10)}.doc`;
     a.click();
     URL.revokeObjectURL(url);
     showToast(t('wordToast'), 'success');
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   Utilities
-   ═══════════════════════════════════════════════════════════ */
 function escapeHtml(s) {
     if (s==null) return '';
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1069,9 +1037,6 @@ function showToast(msg, type='') {
     toast._timer = setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Events
-   ═══════════════════════════════════════════════════════════ */
 document.getElementById('setupForm').addEventListener('submit', e => {
     e.preventDefault();
     const systemName = document.getElementById('inputSystemName').value.trim();
@@ -1082,11 +1047,33 @@ document.getElementById('setupForm').addEventListener('submit', e => {
     meta = { systemName, url, version };
     saveMeta();
     if (!isEdit) {
-        flatTests.forEach(t => { t.status='not_started'; t.notes=''; t.poc_images=[]; });
+        flatTests.forEach(t => { t.status='not_started'; t.notes=''; t.poc_images=[]; t.poc_url=''; });
         saveProgress(); currentIndex = 0;
     }
     showAssessment();
     showToast(isEdit ? t('updated') : t('started'), 'success');
+});
+
+document.getElementById('setupLoadChecklistBtn').addEventListener('click', () => document.getElementById('checklistLoader').click());
+document.getElementById('checklistLoader').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if (!data.categories) throw new Error('Invalid structure');
+            checklistData = data;
+            buildFlatTests();
+            currentIndex = 0;
+            showToast(t('checklistLoaded'), 'success');
+            if (meta) { showAssessment(); } else { document.getElementById('inputSystemName').focus(); }
+        } catch(err) {
+            showToast(t('checklistError'), 'error');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
 });
 
 document.getElementById('setupLoadBtn').addEventListener('click', () => document.getElementById('fileLoader').click());
@@ -1095,7 +1082,7 @@ document.getElementById('loadBtn').addEventListener('click', () => document.getE
 document.getElementById('editMetaBtn').addEventListener('click', () => showSetup());
 document.getElementById('resetBtn').addEventListener('click', () => {
     if (!confirm(t('resetConfirm'))) return;
-    flatTests.forEach(t => { t.status='not_started'; t.notes=''; t.poc_images=[]; });
+    flatTests.forEach(t => { t.status='not_started'; t.notes=''; t.poc_images=[]; t.poc_url=''; });
     currentIndex = 0; saveProgress(); render(); showToast(t('resetToast'),'success');
 });
 document.getElementById('fileLoader').addEventListener('change', e => {
@@ -1117,17 +1104,11 @@ document.getElementById('nextBtn').addEventListener('click', () => {
     }
 });
 
-// جستجو در منو
 document.getElementById('sidebarSearch').addEventListener('input', renderSidebar);
-
-// خروجی Word
 document.getElementById('exportWordBtn').addEventListener('click', exportWord);
-
-// Lang
 document.getElementById('langSelectSetup').addEventListener('change', e => setLang(e.target.value));
 document.getElementById('langSelectSidebar').addEventListener('change', e => setLang(e.target.value));
 
-// About modal
 function openAbout() { document.getElementById('aboutModal').classList.add('show'); }
 function closeAbout() { document.getElementById('aboutModal').classList.remove('show'); }
 document.getElementById('aboutBtn').addEventListener('click', openAbout);
@@ -1135,9 +1116,8 @@ document.getElementById('aboutBtnSetup').addEventListener('click', openAbout);
 document.getElementById('aboutClose').addEventListener('click', closeAbout);
 document.getElementById('aboutModal').addEventListener('click', e => { if (e.target.id === 'aboutModal') closeAbout(); });
 
-// Keyboard
 document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.isContentEditable) {
         if ((e.ctrlKey||e.metaKey) && e.key === 's') { e.preventDefault(); downloadAssessment(); }
         if ((e.ctrlKey||e.metaKey) && e.key === 'e') { e.preventDefault(); exportWord(); }
         return;
@@ -1149,10 +1129,9 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft' && currentIndex < flatTests.length-1) { currentIndex++; if (flatTests.length) expandedCats[flatTests[currentIndex].categoryId]=true; render(); }
 });
 
-/* ═══════════════════════════════════════════════════════════
-   Start
-   ═══════════════════════════════════════════════════════════ */
-loadChecklist();
+checklistData = getSampleData();
+buildFlatTests();
+bootApp();
 </script>
 </body>
 </html>
